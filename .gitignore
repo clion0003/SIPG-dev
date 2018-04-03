@@ -1,0 +1,12 @@
+pycaffe/*
+!/pycaffe/readme.md
+model_para/*
+!/model_para/readme.md
+thirdparty/*
+!/thirdparty/readme.md
+
+src/DetectRecog/x64/
+src/DetectRecog/DetectRecog/x64/
+*.sdf
+
+*pyc
