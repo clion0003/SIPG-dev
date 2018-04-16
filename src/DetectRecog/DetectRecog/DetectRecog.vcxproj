@@ -157,6 +157,7 @@
     <ClInclude Include="side_detect\side_detect.h" />
     <ClInclude Include="side_detect\side_utils.h" />
     <ClInclude Include="side_detect\synth_detector.h" />
+    <ClInclude Include="socketcpp\tcpClient.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

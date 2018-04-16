@@ -16,6 +16,7 @@ int	east_request(string path,std::vector<east_bndbox>& boxes);
 int	ctpn_request(string path, std::vector<cv::Rect>& rects, bool isRotate);
 int crnn_request(string imgpath, std::vector<string>& strs);
 int deeplab_request(string imgpath, cv::Rect& rect);
+int front_classifier_request(string imgpath, std::vector<bool>& results);
 //
 //int main(int argc, char* argv[])
 //{

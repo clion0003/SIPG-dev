@@ -104,5 +104,8 @@
     <ClInclude Include="detect\utils.h">
       <Filter>Header Files\detect</Filter>
     </ClInclude>
+    <ClInclude Include="socketcpp\tcpClient.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
