@@ -800,7 +800,13 @@ string NumberDetector::detectRowNumber_front(string imgsavepath) {
 
 	vector<string> strs;
 	crnn_request(imgsavepath, strs);
-	return strs[0];
+
+	string output_str;
+	if (strs.size() > 0)
+		output_str = strs[0];
+
+	for (int i = 1; i < strs.size(); i++)
+		output_str = output_str + " " + strs[i];
 
 //	count = 0;
 //
@@ -902,8 +908,8 @@ string NumberDetector::detectRowNumber_front(string imgsavepath) {
 //	cv::imshow("CLUSTER", showimg5);
 //	cv::waitKey(0);
 //#endif
-//	std::transform(output_str.begin(), output_str.end(), output_str.begin(), ::toupper);
-//	return output_str;
+	std::transform(output_str.begin(), output_str.end(), output_str.begin(), ::toupper);
+	return output_str;
 }
 
 void NumberDetector::locateNumber(vector<east_bndbox>& east_boxes, vector<Rect> cluster, vector<Rect>& boxes) {

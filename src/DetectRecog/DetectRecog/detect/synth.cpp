@@ -370,7 +370,12 @@ string detectRegion(string& imgpath, vector<east_bndbox>& east_boxes, Rect deepl
 	//img_org.copyTo(showimg4);
 	count = 0;
 
-	string output_str="";
+	string output_str;
+	if(strs.size() > 0)
+		output_str=strs[0];
+
+	for (int i = 1; i < strs.size(); i++)
+		output_str = output_str + " " + strs[i];
 
 
 //	ccq delete
