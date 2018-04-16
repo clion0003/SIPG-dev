@@ -1,7 +1,7 @@
 #include "NumberDetector.h"
 #include "getMSER.hpp"
 #include "utils.h"
-#include "socketcpp\tcpClient.h"
+#include "..\socketcpp\tcpClient.h"
 #include <regex>
 #include "config.h"
 using namespace std;
@@ -286,52 +286,52 @@ string NumberDetector::detectVerticalNumber(string savepath) {
 	string recog_result;
 	alex_request(savepath, recog_result);
 
-	
+	return recog_result;
 
 
-#if 0
-	_org_img.copyTo(drawimg);
-	for (int i = 0;i < fillGapRects.size();i++) {
-		
-		Rect rect = fillGapRects[i];
-		scaleSingleRect(rect, 0.2, 0.1, _org_img.cols, _org_img.rows);
-		cv::rectangle(drawimg, rect, cv::Scalar(0, 0, 255), 1);
-		char digit[2];
-		digit[0]=recog_result[i];
-		digit[1] = '\0';
-		cv::putText(drawimg, digit, cv::Point(rect.x+rect.width, rect.y+rect.height), 1, 1.6, cv::Scalar(0, 255, 255),2);
-	}
-	cv::imshow(_imgpath, drawimg);
-	cv::waitKey(0);
-#endif
-	//recog_result.insert(4, " ");
-	std::transform(recog_result.begin(), recog_result.end(), recog_result.begin(), ::tolower);
-	string company_code;
-	string container_code;
-	int flag = -1;
-	for (int i = 0; i < recog_result.size(); i++) {
-		if (recog_result[i] >= '0'&& recog_result[i] <= '9') {
-			flag = i;
-			company_code = string(recog_result, 0, i);
-			container_code = string(recog_result, i, recog_result.size()-i);
-			break;
-		}
-	}
-	string final_str;
-	if (flag <= 0) {
-		company_code = "????";
-		final_str = company_code + recog_result;
-	}
-	else {
-		string new_company_str;
-		conNuMostSimMatch(company_code, new_company_str);
-		final_str = new_company_str + container_code;
-		
-	}
-	std::transform(final_str.begin(), final_str.end(), final_str.begin(), ::toupper);
-	addUnknownMark(final_str, 11, 11);
-	final_str.insert(4, " ");
-	return final_str;
+//#if 0
+//	_org_img.copyTo(drawimg);
+//	for (int i = 0;i < fillGapRects.size();i++) {
+//		
+//		Rect rect = fillGapRects[i];
+//		scaleSingleRect(rect, 0.2, 0.1, _org_img.cols, _org_img.rows);
+//		cv::rectangle(drawimg, rect, cv::Scalar(0, 0, 255), 1);
+//		char digit[2];
+//		digit[0]=recog_result[i];
+//		digit[1] = '\0';
+//		cv::putText(drawimg, digit, cv::Point(rect.x+rect.width, rect.y+rect.height), 1, 1.6, cv::Scalar(0, 255, 255),2);
+//	}
+//	cv::imshow(_imgpath, drawimg);
+//	cv::waitKey(0);
+//#endif
+//	//recog_result.insert(4, " ");
+//	std::transform(recog_result.begin(), recog_result.end(), recog_result.begin(), ::tolower);
+//	string company_code;
+//	string container_code;
+//	int flag = -1;
+//	for (int i = 0; i < recog_result.size(); i++) {
+//		if (recog_result[i] >= '0'&& recog_result[i] <= '9') {
+//			flag = i;
+//			company_code = string(recog_result, 0, i);
+//			container_code = string(recog_result, i, recog_result.size()-i);
+//			break;
+//		}
+//	}
+//	string final_str;
+//	if (flag <= 0) {
+//		company_code = "????";
+//		final_str = company_code + recog_result;
+//	}
+//	else {
+//		string new_company_str;
+//		conNuMostSimMatch(company_code, new_company_str);
+//		final_str = new_company_str + container_code;
+//		
+//	}
+//	std::transform(final_str.begin(), final_str.end(), final_str.begin(), ::toupper);
+//	addUnknownMark(final_str, 11, 11);
+//	final_str.insert(4, " ");
+//	return final_str;
 };
 
 int NumberDetector::getRectClusterLength(vector<Rect>& cluster, int direction) {
@@ -800,109 +800,110 @@ string NumberDetector::detectRowNumber_front(string imgsavepath) {
 
 	vector<string> strs;
 	crnn_request(imgsavepath, strs);
+	return strs[0];
 
-	count = 0;
-
-	string output_str = "";
-
-	for (auto rect : upboxes) {
-		rectangle(showimg4, rect, green, 2);
-
-
-		string chechdatabase;
-		conNuMostSimMatch(strs[count], chechdatabase);
-		output_str = output_str + chechdatabase;
-
-		cv::putText(showimg4, chechdatabase, cv::Point(rect.x, rect.y), 1.9, 1.7, red, 2);
-		count++;
-	}
-	for (int i = 0; i < midboxes.size(); i++) {
-		Rect rect = midboxes[i];
-		rectangle(showimg4, rect, green, 2);
-		if (up == -1 && i == 0) {
-			char firstchar = strs[count].c_str()[0];
-			string restchars = strs[count].c_str() + 1;
-			//string newstr;
-
-			string checkdatabase;
-			conNuMostSimMatch(strs[count], checkdatabase);
-			
-			
-			if (checkdatabase.compare("") == 0) {
-				output_str = output_str + strs[count];
-				cv::putText(showimg4, strs[count], cv::Point(rect.x, rect.y), 1.9, 1.7, red, 2);
-				
-			}
-			else {
-				output_str = output_str + checkdatabase;
-				cv::putText(showimg4, checkdatabase, cv::Point(rect.x, rect.y), 1.9, 1.7, red, 2);
-			}
-
-		}
-		else if (midboxes[i].width<midboxes[i].height) {
-			addUnknownMark(output_str, 10, 8);
-
-			int lastid = strs[count].size();
-			string lastdigit = strs[count].c_str() + lastid - 1;
-			if (lastdigit[0] == 'z')
-				lastdigit = '2';
-			else if (lastdigit[0] == 'o' || lastdigit[0] == 'c')
-				lastdigit = '0';
-			else if (lastdigit[0] == 'b')
-				lastdigit = '3';
-			else if (lastdigit[0] == 'd' || lastdigit[0] == 'q' || lastdigit[0] == 'e' || lastdigit[0] == 'i')
-				lastdigit = '1';
-
-			output_str = output_str + lastdigit;
-			cv::putText(showimg4, lastdigit, cv::Point(rect.x, rect.y), 1.9, 1.7, red, 2);
-		}
-		else if (up != -1 && midboxes.size() == 1 && strs[count].size()>7) {
-			string contNum(strs[count]);
-			contNum.erase(4, 1);
-			cv::putText(showimg4, contNum, cv::Point(rect.x, rect.y), 1.9, 1.7, red, 2);
-			output_str = output_str + contNum;
-		}
-		else {
-			cv::putText(showimg4, strs[count], cv::Point(rect.x, rect.y), 1.9, 1.7, red, 2);
-			output_str = output_str + strs[count];
-		}
-
-		count++;
-	}
-	addUnknownMark(output_str, 11, 8);
-	for (auto rect : downboxes) {
-		rectangle(showimg4, rect, green, 2);
-
-		string findDatabase;
-
-		mostSimMatch(strs[count], findDatabase);
-		cv::putText(showimg4, findDatabase, cv::Point(rect.x, rect.y), 1.9, 1.7, red, 2);
-
-		output_str = output_str + findDatabase;
-		count++;
-	}
-	addUnknownMark(output_str, 15, 8);
-	output_str.insert(11, " ");
-	output_str.insert(4, " ");
-	//cout << output_str << endl;
-#if 0
-	cv::imshow(_imgpath, showimg4);
-	cv::waitKey(0);
-#endif 
-#if 0
-	for (int i = 0; i < clusterNum; i++) {
-		cv::Scalar rectColor(rand()*1.0 / RAND_MAX * 255, rand()*1.0 / RAND_MAX * 255, rand()*1.0 / RAND_MAX * 255);
-		for (auto rect : clusters[i]) {
-			float v = 255.0*i / clusterNum;
-
-			rectangle(showimg5, rect, rectColor);
-		}
-	}
-	cv::imshow("CLUSTER", showimg5);
-	cv::waitKey(0);
-#endif
-	std::transform(output_str.begin(), output_str.end(), output_str.begin(), ::toupper);
-	return output_str;
+//	count = 0;
+//
+//	string output_str = "";
+//
+//	for (auto rect : upboxes) {
+//		rectangle(showimg4, rect, green, 2);
+//
+//
+//		string chechdatabase;
+//		conNuMostSimMatch(strs[count], chechdatabase);
+//		output_str = output_str + chechdatabase;
+//
+//		cv::putText(showimg4, chechdatabase, cv::Point(rect.x, rect.y), 1.9, 1.7, red, 2);
+//		count++;
+//	}
+//	for (int i = 0; i < midboxes.size(); i++) {
+//		Rect rect = midboxes[i];
+//		rectangle(showimg4, rect, green, 2);
+//		if (up == -1 && i == 0) {
+//			char firstchar = strs[count].c_str()[0];
+//			string restchars = strs[count].c_str() + 1;
+//			//string newstr;
+//
+//			string checkdatabase;
+//			conNuMostSimMatch(strs[count], checkdatabase);
+//			
+//			
+//			if (checkdatabase.compare("") == 0) {
+//				output_str = output_str + strs[count];
+//				cv::putText(showimg4, strs[count], cv::Point(rect.x, rect.y), 1.9, 1.7, red, 2);
+//				
+//			}
+//			else {
+//				output_str = output_str + checkdatabase;
+//				cv::putText(showimg4, checkdatabase, cv::Point(rect.x, rect.y), 1.9, 1.7, red, 2);
+//			}
+//
+//		}
+//		else if (midboxes[i].width<midboxes[i].height) {
+//			addUnknownMark(output_str, 10, 8);
+//
+//			int lastid = strs[count].size();
+//			string lastdigit = strs[count].c_str() + lastid - 1;
+//			if (lastdigit[0] == 'z')
+//				lastdigit = '2';
+//			else if (lastdigit[0] == 'o' || lastdigit[0] == 'c')
+//				lastdigit = '0';
+//			else if (lastdigit[0] == 'b')
+//				lastdigit = '3';
+//			else if (lastdigit[0] == 'd' || lastdigit[0] == 'q' || lastdigit[0] == 'e' || lastdigit[0] == 'i')
+//				lastdigit = '1';
+//
+//			output_str = output_str + lastdigit;
+//			cv::putText(showimg4, lastdigit, cv::Point(rect.x, rect.y), 1.9, 1.7, red, 2);
+//		}
+//		else if (up != -1 && midboxes.size() == 1 && strs[count].size()>7) {
+//			string contNum(strs[count]);
+//			contNum.erase(4, 1);
+//			cv::putText(showimg4, contNum, cv::Point(rect.x, rect.y), 1.9, 1.7, red, 2);
+//			output_str = output_str + contNum;
+//		}
+//		else {
+//			cv::putText(showimg4, strs[count], cv::Point(rect.x, rect.y), 1.9, 1.7, red, 2);
+//			output_str = output_str + strs[count];
+//		}
+//
+//		count++;
+//	}
+//	addUnknownMark(output_str, 11, 8);
+//	for (auto rect : downboxes) {
+//		rectangle(showimg4, rect, green, 2);
+//
+//		string findDatabase;
+//
+//		mostSimMatch(strs[count], findDatabase);
+//		cv::putText(showimg4, findDatabase, cv::Point(rect.x, rect.y), 1.9, 1.7, red, 2);
+//
+//		output_str = output_str + findDatabase;
+//		count++;
+//	}
+//	addUnknownMark(output_str, 15, 8);
+//	output_str.insert(11, " ");
+//	output_str.insert(4, " ");
+//	//cout << output_str << endl;
+//#if 0
+//	cv::imshow(_imgpath, showimg4);
+//	cv::waitKey(0);
+//#endif 
+//#if 0
+//	for (int i = 0; i < clusterNum; i++) {
+//		cv::Scalar rectColor(rand()*1.0 / RAND_MAX * 255, rand()*1.0 / RAND_MAX * 255, rand()*1.0 / RAND_MAX * 255);
+//		for (auto rect : clusters[i]) {
+//			float v = 255.0*i / clusterNum;
+//
+//			rectangle(showimg5, rect, rectColor);
+//		}
+//	}
+//	cv::imshow("CLUSTER", showimg5);
+//	cv::waitKey(0);
+//#endif
+//	std::transform(output_str.begin(), output_str.end(), output_str.begin(), ::toupper);
+//	return output_str;
 }
 
 void NumberDetector::locateNumber(vector<east_bndbox>& east_boxes, vector<Rect> cluster, vector<Rect>& boxes) {

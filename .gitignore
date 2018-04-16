@@ -7,6 +7,7 @@ thirdparty/*
 
 src/DetectRecog/x64/
 src/DetectRecog/DetectRecog/x64/
+src/ccq
 *.sdf
 
 *pyc

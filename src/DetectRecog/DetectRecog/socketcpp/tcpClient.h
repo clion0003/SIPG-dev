@@ -4,7 +4,7 @@
 #include <boost/asio.hpp>
 #include <string>
 #include <opencv2/core.hpp>
-#include "../MyTypes.h"
+#include "..\detect\MyTypes.h"
 using std::string;
 using boost::asio::ip::tcp;
 

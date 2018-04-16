@@ -20,5 +20,5 @@ mode: =0 自动判断正反面
 #define FCOL_MODE 1
 #define FROW_MODE 2
 
-DLL_API bool detect(char* output, const char* input, int side);
-DLL_API bool detectSide(char *output,const char *input, int side);
+//bool detect(char* output, const char* input, int side);
+bool detect(char* output, const char* input, int side);
