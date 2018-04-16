@@ -22,6 +22,41 @@ int  initSocket() {
 	return 0;
 }
 
+int front_classifier_request(string imgpath, std::vector<bool>& results) {
+	SOCKADDR_IN addrServer;
+	SOCKET client_front_classifier = socket(AF_INET, SOCK_STREAM, 0);
+	addrServer.sin_addr.S_un.S_addr = inet_addr("127.0.0.1");
+	addrServer.sin_family = AF_INET;
+	addrServer.sin_port = htons(6006);
+	int ret = connect(client_front_classifier, (SOCKADDR*)&addrServer, sizeof(SOCKADDR));
+	send(client_front_classifier, imgpath.c_str(), imgpath.length(), 0);
+	const int buflen = 4000;
+	char recvBuf[buflen];
+	for (int i = 0; i < buflen; i++) {
+		recvBuf[i] = '0';
+	}
+	recv(client_front_classifier, recvBuf, buflen, 0);
+
+	Document json;
+	json.Parse(recvBuf);
+	printf("\n%s\n", recvBuf);
+
+	for (Value::ConstMemberIterator itr = json.MemberBegin();
+	itr != json.MemberEnd(); ++itr)
+	{
+		printf("Type of member %s is %s\n",
+			itr->name.GetString(), kTypeNames[itr->value.GetType()]);
+	}
+
+	for (int j = 0; j < json["strnum"].GetInt(); j++) {
+		string charind = std::to_string(j);
+		const Value& array1 = json[charind.c_str()];
+		results.push_back(bool(array1.GetInt()));
+
+	}
+	return 0;
+}
+
 int east_request(string imgpath, std::vector<east_bndbox>& boxes) {
 	SOCKADDR_IN addrServer;
 	//SOCKET client_alex = socket(AF_INET, SOCK_STREAM, 0);

@@ -1,0 +1,3 @@
+1.将之前的侧面和正面的字符检测识别分成两个模块，分别是./src/DetectRecog/DetectRecog/detect和./src/DetectRecog/DetectRecog/side_detect。只需要分别include这两个文件夹底下的detect.h和side_detect.h，调用其中提供的函数即可使用这两个模块。
+2./src/DetectRecog/DetectRecog底下的三个.cpp均是字符匹配相关的文件，目前还没include到工程中去，徐成文学长到时候可根据需要添加或修改。然后刘易学长的detect模块中本来已经利用上述三文件进行结果字符处理的代码，分别是synth.cpp中381-492行，Numdetector.cpp中292-333行，811-910行，这部分代码我都注释掉了，而只返回最原始的结果，学长到时候可以参考这部分代码做字符匹配
+3.把前后箱面判断的代码整合进去，如果要使用需要把模型从百度云上下载下来，放入./model_para文件夹中

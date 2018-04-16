@@ -131,44 +131,33 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="getMSER.cpp" />
-    <ClCompile Include="lcss.cpp" />
-    <ClCompile Include="mostSimMatch.cpp" />
-    <ClCompile Include="mser_filter.cpp" />
-    <ClCompile Include="NumberDetector.cpp" />
-    <ClCompile Include="numMostSim.cpp" />
-    <ClCompile Include="recallratio.cpp" />
+    <ClCompile Include="detect\getMSER.cpp" />
+    <ClCompile Include="detect\NumberDetector.cpp" />
+    <ClCompile Include="detect\recallratio.cpp" />
+    <ClCompile Include="detect\Source.cpp" />
+    <ClCompile Include="detect\synth.cpp" />
+    <ClCompile Include="detect\utils.cpp" />
+    <ClCompile Include="side_detect\east_filter.cpp" />
+    <ClCompile Include="side_detect\mser_filter.cpp" />
+    <ClCompile Include="side_detect\side_detect.cpp" />
+    <ClCompile Include="side_detect\side_utils.cpp" />
+    <ClCompile Include="side_detect\synth_detector.cpp" />
     <ClCompile Include="socketcpp\tcpClient.cpp" />
-    <ClCompile Include="Source.cpp" />
-    <ClCompile Include="synth.cpp" />
-    <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="colors.h" />
-    <ClInclude Include="config.h" />
-    <ClInclude Include="detect.h" />
-    <ClInclude Include="getMSER.hpp" />
-    <ClInclude Include="mser_filter.h" />
-    <ClInclude Include="MyTypes.h" />
-    <ClInclude Include="NumberDetector.h" />
-    <ClInclude Include="recallratio.h" />
+    <ClInclude Include="detect\colors.h" />
+    <ClInclude Include="detect\config.h" />
+    <ClInclude Include="detect\detect.h" />
+    <ClInclude Include="detect\MyTypes.h" />
+    <ClInclude Include="detect\NumberDetector.h" />
+    <ClInclude Include="detect\recallratio.h" />
+    <ClInclude Include="detect\utils.h" />
+    <ClInclude Include="side_detect\east_filter.h" />
+    <ClInclude Include="side_detect\mser_filter.h" />
+    <ClInclude Include="side_detect\side_detect.h" />
+    <ClInclude Include="side_detect\side_utils.h" />
+    <ClInclude Include="side_detect\synth_detector.h" />
     <ClInclude Include="socketcpp\tcpClient.h" />
-    <ClInclude Include="textDetection\Candidate.h" />
-    <ClInclude Include="textDetection\FilterBox.h" />
-    <ClInclude Include="textDetection\Fmeasure.h" />
-    <ClInclude Include="textDetection\GetCandidate.h" />
-    <ClInclude Include="textDetection\GroundDetect.h" />
-    <ClInclude Include="textDetection\headline.h" />
-    <ClInclude Include="textDetection\LinkCandidate.h" />
-    <ClInclude Include="textDetection\LinkCandidateUtil.h" />
-    <ClInclude Include="textDetection\mser.h" />
-    <ClInclude Include="textDetection\PolyGroundTruth.h" />
-    <ClInclude Include="textDetection\swt.h" />
-    <ClInclude Include="textDetection\swtUtil.h" />
-    <ClInclude Include="textDetection\TextDetection.h" />
-    <ClInclude Include="textDetection\Tools.h" />
-    <ClInclude Include="textDetection\VericaficationTextLine.h" />
-    <ClInclude Include="utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -16,116 +16,95 @@
     <Filter Include="Source Files\ServerConnect">
       <UniqueIdentifier>{050d3067-51f4-42ca-ab8a-d304ca0e674b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\side_detect">
+      <UniqueIdentifier>{2de6091a-f860-44b2-a36f-9ce350e5c129}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\detect">
+      <UniqueIdentifier>{4d347758-6014-4c12-973a-43bab0774f37}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\side_detect">
+      <UniqueIdentifier>{0126c4d2-38ea-41b3-ba69-12a1323d5d9b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\detect">
+      <UniqueIdentifier>{4a4686be-77d3-41f5-a87d-2e4c028d933d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="getMSER.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="recallratio.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="synth.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="socketcpp\tcpClient.cpp">
       <Filter>Source Files\ServerConnect</Filter>
     </ClCompile>
-    <ClCompile Include="utils.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="side_detect\east_filter.cpp">
+      <Filter>Source Files\side_detect</Filter>
     </ClCompile>
-    <ClCompile Include="NumberDetector.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="side_detect\mser_filter.cpp">
+      <Filter>Source Files\side_detect</Filter>
     </ClCompile>
-    <ClCompile Include="mostSimMatch.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="side_detect\side_detect.cpp">
+      <Filter>Source Files\side_detect</Filter>
     </ClCompile>
-    <ClCompile Include="mser_filter.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="side_detect\side_utils.cpp">
+      <Filter>Source Files\side_detect</Filter>
     </ClCompile>
-    <ClCompile Include="lcss.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="side_detect\synth_detector.cpp">
+      <Filter>Source Files\side_detect</Filter>
     </ClCompile>
-    <ClCompile Include="numMostSim.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="detect\getMSER.cpp">
+      <Filter>Source Files\detect</Filter>
+    </ClCompile>
+    <ClCompile Include="detect\NumberDetector.cpp">
+      <Filter>Source Files\detect</Filter>
+    </ClCompile>
+    <ClCompile Include="detect\recallratio.cpp">
+      <Filter>Source Files\detect</Filter>
+    </ClCompile>
+    <ClCompile Include="detect\Source.cpp">
+      <Filter>Source Files\detect</Filter>
+    </ClCompile>
+    <ClCompile Include="detect\synth.cpp">
+      <Filter>Source Files\detect</Filter>
+    </ClCompile>
+    <ClCompile Include="detect\utils.cpp">
+      <Filter>Source Files\detect</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="colors.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="side_detect\east_filter.h">
+      <Filter>Header Files\side_detect</Filter>
     </ClInclude>
-    <ClInclude Include="config.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="side_detect\mser_filter.h">
+      <Filter>Header Files\side_detect</Filter>
     </ClInclude>
-    <ClInclude Include="getMSER.hpp">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="side_detect\side_detect.h">
+      <Filter>Header Files\side_detect</Filter>
     </ClInclude>
-    <ClInclude Include="recallratio.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="side_detect\side_utils.h">
+      <Filter>Header Files\side_detect</Filter>
     </ClInclude>
-    <ClInclude Include="textDetection\Candidate.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="side_detect\synth_detector.h">
+      <Filter>Header Files\side_detect</Filter>
     </ClInclude>
-    <ClInclude Include="textDetection\FilterBox.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="detect\colors.h">
+      <Filter>Header Files\detect</Filter>
     </ClInclude>
-    <ClInclude Include="textDetection\Fmeasure.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="detect\config.h">
+      <Filter>Header Files\detect</Filter>
     </ClInclude>
-    <ClInclude Include="textDetection\GetCandidate.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="detect\detect.h">
+      <Filter>Header Files\detect</Filter>
     </ClInclude>
-    <ClInclude Include="textDetection\GroundDetect.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="detect\MyTypes.h">
+      <Filter>Header Files\detect</Filter>
     </ClInclude>
-    <ClInclude Include="textDetection\headline.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="detect\NumberDetector.h">
+      <Filter>Header Files\detect</Filter>
     </ClInclude>
-    <ClInclude Include="textDetection\LinkCandidate.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="detect\recallratio.h">
+      <Filter>Header Files\detect</Filter>
     </ClInclude>
-    <ClInclude Include="textDetection\LinkCandidateUtil.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="textDetection\mser.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="textDetection\PolyGroundTruth.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="textDetection\swt.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="textDetection\swtUtil.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="textDetection\TextDetection.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="textDetection\Tools.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="textDetection\VericaficationTextLine.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="detect\utils.h">
+      <Filter>Header Files\detect</Filter>
     </ClInclude>
     <ClInclude Include="socketcpp\tcpClient.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="utils.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MyTypes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="NumberDetector.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="detect.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="mser_filter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

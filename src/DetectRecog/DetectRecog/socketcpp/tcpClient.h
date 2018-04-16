@@ -4,7 +4,7 @@
 #include <boost/asio.hpp>
 #include <string>
 #include <opencv2/core.hpp>
-#include "../MyTypes.h"
+#include "..\detect\MyTypes.h"
 using std::string;
 using boost::asio::ip::tcp;
 
@@ -16,6 +16,7 @@ int	east_request(string path,std::vector<east_bndbox>& boxes);
 int	ctpn_request(string path, std::vector<cv::Rect>& rects, bool isRotate);
 int crnn_request(string imgpath, std::vector<string>& strs);
 int deeplab_request(string imgpath, cv::Rect& rect);
+int front_classifier_request(string imgpath, std::vector<bool>& results);
 //
 //int main(int argc, char* argv[])
 //{

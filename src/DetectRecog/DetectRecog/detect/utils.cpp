@@ -443,10 +443,10 @@ float getAverageHeight(vector<Rect>& rects) {
 	average_height = average_height / rects.size();
 	return average_height;
 }
-bool sortByLen(vector<cv::Rect> v1, vector<cv::Rect> v2)
-{
-	return v1.size() > v2.size();
-}
+//bool sortByLen(vector<cv::Rect> v1, vector<cv::Rect> v2)
+//{
+//	return v1.size() > v2.size();
+//}
 void getClusterBbox(vector<cv::Rect> &cluster, cv::Rect &bbox)
 {
 	int minX = 10000, minY = 10000, maxX = 0, maxY = 0;

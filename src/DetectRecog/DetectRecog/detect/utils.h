@@ -38,6 +38,6 @@ void getClusterBbox(vector<cv::Rect> &cluster, cv::Rect &bbox);
 void getClusterAvgHW(vector<cv::Rect> &cluster, int &avgHeight, int &avgWidth);
 void getClusterMaxHW(vector<cv::Rect> &cluster, int &maxHeight, int &maxWidth);
 void addUnknownMark(string& str,int targetLength,int removePos);
-bool sortByLen(vector<cv::Rect> v1, vector<cv::Rect> v2);
+//bool sortByLen(vector<cv::Rect> v1, vector<cv::Rect> v2);
 //void clearDir(string path);
 bool clusterSortByY(vector<cv::Rect>& c1, vector<cv::Rect>& c2);

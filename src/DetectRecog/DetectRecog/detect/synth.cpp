@@ -11,7 +11,7 @@
 #include <iostream>
 #include <string>
 
-#include "socketcpp/tcpClient.h"
+#include "..\socketcpp\tcpClient.h"
 
 #include <time.h>
 //#include "textDetection/TextDetection.h"
@@ -19,13 +19,16 @@
 #include "getMSER.hpp"
 #include "NumberDetector.h"
 #include "utils.h"
-#include "mser_filter.h"
+#include "..\side_detect\mser_filter.h"
 #include "detect.h"
 #include "config.h"
 
 //#include <windows.h>
-extern bool mostSimMatch(const string &iStr, string &oStr);
-extern bool conNuMostSimMatch(const string &iStr, string &oStr);
+
+// ccq delete
+//extern bool mostSimMatch(const string &iStr, string &oStr);
+//extern bool conNuMostSimMatch(const string &iStr, string &oStr);
+
 using std::to_string;
 using cv::Mat;
 using std::cout;
@@ -367,119 +370,126 @@ string detectRegion(string& imgpath, vector<east_bndbox>& east_boxes, Rect deepl
 	//img_org.copyTo(showimg4);
 	count = 0;
 
-	string output_str="";
+	string output_str;
+	if(strs.size() > 0)
+		output_str=strs[0];
 
-	for (auto rect : upboxes) {
-		rectangle(showimg4, rect, green, 2);
-		
-		
-		string chechdatabase;
-		conNuMostSimMatch(strs[count], chechdatabase);
-		output_str = output_str + chechdatabase + " ";
+	for (int i = 1; i < strs.size(); i++)
+		output_str = output_str + " " + strs[i];
 
-		cv::putText(showimg4, chechdatabase, cv::Point(rect.x, rect.y), 1.9, 1.7, red, 2);
-		count++;
-	}
-	for (int i = 0;i < midboxes.size();i++) {
-		Rect rect = midboxes[i];
-		rectangle(showimg4, rect, green, 2);
-		if (up == -1 && i==0) {
-			char firstchar = strs[count].c_str()[0];
-			string restchars = strs[count].c_str() + 1;
-			//string newstr;
-			
-			string checkdatabase;
-			conNuMostSimMatch(strs[count], checkdatabase);
-			output_str = output_str + checkdatabase + " ";
 
-			/*if (firstchar == 'i')
-				newstr = "t" + restchars;
-			else
-				newstr = strs[count];*/
-			cv::putText(showimg4, checkdatabase, cv::Point(rect.x, rect.y), 1.9, 1.7, red, 2);
-
-		}
-		else if (midboxes[i].width<midboxes[i].height) {
-			int lastid = strs[count].size();
-			string lastdigit = strs[count].c_str() + lastid - 1;
-			if (lastdigit[0] == 'z')
-				lastdigit = '2';
-			else if (lastdigit[0] == 'o' || lastdigit[0] == 'c')
-				lastdigit = '0';
-			else if (lastdigit[0] == 'b')
-				lastdigit = '3';
-			else if (lastdigit[0] == 'd' || lastdigit[0] == 'q')
-				lastdigit = '1';
-
-			output_str = output_str +  lastdigit;
-			cv::putText(showimg4, lastdigit, cv::Point(rect.x, rect.y), 1.9, 1.7, red, 2);
-		}
-		
-		/*else if (i == midboxes.size() - 1 && up == -1 && midboxes.size()>2) {
-			int lastid = strs[count].size();
-			string lastdigit = strs[count].c_str()+lastid-1;
-			if (lastdigit[0] == 'z')
-				lastdigit = '2';
-			else if (lastdigit[0] == 'o')
-				lastdigit = '0';
-			cv::putText(showimg4, lastdigit, cv::Point(rect.x, rect.y), 1.9, 1.7, red, 2);
-		}*/
-		else {
-			cv::putText(showimg4, strs[count], cv::Point(rect.x, rect.y), 1.9, 1.7, red, 2);
-			output_str = output_str + strs[count];
-		}
-		/*if (i == 0 && up == -1) {
-			string chechdatabase;
-			conNuMostSimMatch(strs[count], chechdatabase);
-			output_str = output_str + chechdatabase + " ";
-		}
-		else {
-			output_str += strs[count];
-		}*/
-
-		count++;
-	}
-	for (auto rect : downboxes) {
-		rectangle(showimg4, rect, green, 2);
-
-		string findDatabase;
-
-		mostSimMatch(strs[count],findDatabase);
-		cv::putText(showimg4, findDatabase, cv::Point(rect.x, rect.y), 1.9, 1.7, red, 2);
-
-		output_str = output_str +  " " + findDatabase;
-		/*if(strs[count][0]=='2')
-			cv::putText(showimg4, "22g1", cv::Point(rect.x, rect.y ), 1.9, 1.7, red, 2);
-		else if(strs[count][0] == '4')
-			if (strs[count][1] == '2')
-				if (strs[count][2] == '6'|| strs[count][2] == 'g')
-					cv::putText(showimg4, "42g1", cv::Point(rect.x, rect.y), 1.9, 1.7, red, 2);
-				else
-					cv::putText(showimg4, "42u1", cv::Point(rect.x, rect.y), 1.9, 1.7, red, 2);
-			else
-				cv::putText(showimg4, "45g1", cv::Point(rect.x, rect.y ), 1.9, 1.7, red, 2);
-		else
-			cv::putText(showimg4, strs[count], cv::Point(rect.x, rect.y), 1.9, 1.7, red, 2);*/
-		count++;
-	}
-
-	//cout << output_str << endl;
-#if 0
-	cv::imshow(imgpath, showimg4);
-	cv::waitKey(0);
-#endif 
-#if 0
-	for (int i = 0; i < clusterNum; i++) {
-		cv::Scalar rectColor(rand()*1.0 / RAND_MAX * 255, rand()*1.0 / RAND_MAX * 255, rand()*1.0 / RAND_MAX * 255);
-		for (auto rect : clusters[i]) {
-			float v = 255.0*i / clusterNum;
-			
-			rectangle(showimg5, rect, rectColor);
-		}
-	}
-	cv::imshow("CLUSTER", showimg5);
-	cv::waitKey(0);
-#endif
+//	ccq delete
+//	for (auto rect : upboxes) {
+//		rectangle(showimg4, rect, green, 2);
+//		
+//		
+//		string chechdatabase;
+//		conNuMostSimMatch(strs[count], chechdatabase);
+//		output_str = output_str + chechdatabase + " ";
+//
+//		cv::putText(showimg4, chechdatabase, cv::Point(rect.x, rect.y), 1.9, 1.7, red, 2);
+//		count++;
+//	}
+//	for (int i = 0;i < midboxes.size();i++) {
+//		Rect rect = midboxes[i];
+//		rectangle(showimg4, rect, green, 2);
+//		if (up == -1 && i==0) {
+//			char firstchar = strs[count].c_str()[0];
+//			string restchars = strs[count].c_str() + 1;
+//			//string newstr;
+//			
+//			string checkdatabase;
+//			conNuMostSimMatch(strs[count], checkdatabase);
+//			output_str = output_str + checkdatabase + " ";
+//
+//			/*if (firstchar == 'i')
+//				newstr = "t" + restchars;
+//			else
+//				newstr = strs[count];*/
+//			cv::putText(showimg4, checkdatabase, cv::Point(rect.x, rect.y), 1.9, 1.7, red, 2);
+//
+//		}
+//		else if (midboxes[i].width<midboxes[i].height) {
+//			int lastid = strs[count].size();
+//			string lastdigit = strs[count].c_str() + lastid - 1;
+//			if (lastdigit[0] == 'z')
+//				lastdigit = '2';
+//			else if (lastdigit[0] == 'o' || lastdigit[0] == 'c')
+//				lastdigit = '0';
+//			else if (lastdigit[0] == 'b')
+//				lastdigit = '3';
+//			else if (lastdigit[0] == 'd' || lastdigit[0] == 'q')
+//				lastdigit = '1';
+//
+//			output_str = output_str +  lastdigit;
+//			cv::putText(showimg4, lastdigit, cv::Point(rect.x, rect.y), 1.9, 1.7, red, 2);
+//		}
+//		
+//		/*else if (i == midboxes.size() - 1 && up == -1 && midboxes.size()>2) {
+//			int lastid = strs[count].size();
+//			string lastdigit = strs[count].c_str()+lastid-1;
+//			if (lastdigit[0] == 'z')
+//				lastdigit = '2';
+//			else if (lastdigit[0] == 'o')
+//				lastdigit = '0';
+//			cv::putText(showimg4, lastdigit, cv::Point(rect.x, rect.y), 1.9, 1.7, red, 2);
+//		}*/
+//		else {
+//			cv::putText(showimg4, strs[count], cv::Point(rect.x, rect.y), 1.9, 1.7, red, 2);
+//			output_str = output_str + strs[count];
+//		}
+//		/*if (i == 0 && up == -1) {
+//			string chechdatabase;
+//			conNuMostSimMatch(strs[count], chechdatabase);
+//			output_str = output_str + chechdatabase + " ";
+//		}
+//		else {
+//			output_str += strs[count];
+//		}*/
+//
+//		count++;
+//	}
+//	for (auto rect : downboxes) {
+//		rectangle(showimg4, rect, green, 2);
+//
+//		string findDatabase;
+//
+//		mostSimMatch(strs[count],findDatabase);
+//		cv::putText(showimg4, findDatabase, cv::Point(rect.x, rect.y), 1.9, 1.7, red, 2);
+//
+//		output_str = output_str +  " " + findDatabase;
+//		/*if(strs[count][0]=='2')
+//			cv::putText(showimg4, "22g1", cv::Point(rect.x, rect.y ), 1.9, 1.7, red, 2);
+//		else if(strs[count][0] == '4')
+//			if (strs[count][1] == '2')
+//				if (strs[count][2] == '6'|| strs[count][2] == 'g')
+//					cv::putText(showimg4, "42g1", cv::Point(rect.x, rect.y), 1.9, 1.7, red, 2);
+//				else
+//					cv::putText(showimg4, "42u1", cv::Point(rect.x, rect.y), 1.9, 1.7, red, 2);
+//			else
+//				cv::putText(showimg4, "45g1", cv::Point(rect.x, rect.y ), 1.9, 1.7, red, 2);
+//		else
+//			cv::putText(showimg4, strs[count], cv::Point(rect.x, rect.y), 1.9, 1.7, red, 2);*/
+//		count++;
+//	}
+//
+//	//cout << output_str << endl;
+//#if 0
+//	cv::imshow(imgpath, showimg4);
+//	cv::waitKey(0);
+//#endif 
+//#if 0
+//	for (int i = 0; i < clusterNum; i++) {
+//		cv::Scalar rectColor(rand()*1.0 / RAND_MAX * 255, rand()*1.0 / RAND_MAX * 255, rand()*1.0 / RAND_MAX * 255);
+//		for (auto rect : clusters[i]) {
+//			float v = 255.0*i / clusterNum;
+//			
+//			rectangle(showimg5, rect, rectColor);
+//		}
+//	}
+//	cv::imshow("CLUSTER", showimg5);
+//	cv::waitKey(0);
+//#endif
 	std::transform(output_str.begin(), output_str.end(),output_str.begin(), ::toupper);
 	return output_str;
 }
@@ -497,168 +507,6 @@ bool  CheckFolderExist(const string &strPath)
 	FindClose(hFind);
 	return rValue;
 }
-
-
-bool detectSide(char *output,const char *input, int mode)
-{
-	string filePath(input);
-	string tmpSaveDir("D:/SideSaveImg/");
-	Rect deeplabBbox;			// deeplabµÄ½á¹û
-	vector<string> rowOutput;	// ÏäºÅÊÇºá×ÅµÄµÄ½á¹û
-	string colOutput = "???? ??????? ????";			// ÏäºÅÊÇÊú×ÅµÄ½á¹û
-	string tmp;
-	strcpy(output, colOutput.c_str());
-	Mat srcImg = cv::imread(filePath);
-
-	if (!CheckFolderExist(tmpSaveDir)) {
-		CreateDirectory(tmpSaveDir.c_str(), NULL);
-	}
-	//clearDir(tmpSaveDir);		// Çå¿ÕÒÔÏÂ´æ´¢ÖÐ¼äÊý¾ÝµÄÎÄ¼þ¼Ð
-	vector<string> files;
-	getAllFiles(tmpSaveDir, files);
-	for (auto file : files) {
-		DeleteFile(file.c_str());
-	}
-
-	initSocket();
-	deeplab_request(filePath, deeplabBbox); //¸ù¾Ýdeeplab½á¹ûcropÔ­Ê¼Í¼Æ¬£¬ÏÈcropÊÇÎªÁË½µµÍÖ®ºóËã·¨µÄ¼ÆËãÁ¿
-
-
-
-	string deeplabImgPath = filePath.substr(0, filePath.length() - 4) + "_dl.jpg";
-	cv::imwrite(deeplabImgPath, srcImg(deeplabBbox));
-
-
-	MserFilter mf(srcImg, deeplabBbox);
-	mf.filter();
-
-	if (mode == 0)	// AUTO
-	{
-		if (mf.rowClusters.size() != 0){
-			vector<east_bndbox> east_boxes;
-			vector<Rect> mser_boxes;
-			vector<Rect> ctpn_boxes;
-			east_request(deeplabImgPath, east_boxes);
-			Mat deeplabimg = cv::imread(deeplabImgPath);
-			Mat deeplabgrayimg;
-			cv::cvtColor(deeplabimg, deeplabgrayimg, CV_BGR2GRAY);
-			mser_boxes = getMSER(deeplabgrayimg, mserThres, mserMinArea, mserMaxArea);
-
-			NumberDetector* detector = new NumberDetector(deeplabImgPath, ctpn_boxes, east_boxes, mser_boxes, deeplabBbox);
-
-			string output_str = detector->detectRowNumber_front(tmpSaveDir);
-			strcpy(output, output_str.c_str());
-			return true;
-		}
-		else if (mf.colClusters.size() != 0)
-		{
-			for (int j = 0; j < mf.colResult.size(); j++)
-			{
-				Mat tmpImg(srcImg, mf.colResult[j]);
-				imwrite(tmpSaveDir + to_string(j) + ".jpg", tmpImg);
-			}
-			alex_request(tmpSaveDir, tmp);
-
-			if (tmp.size() == 0)
-				return false;
-			else {
-				int companyLen = 3;
-				for (; companyLen >= 0; companyLen--)
-				{
-					if (tmp[companyLen] < '0' || tmp[companyLen] > '9')
-						break;
-				}
-				for (int i = 0; i <= companyLen; i++)
-					colOutput[i] = tmp[i];
-
-				int contLen = 0;
-				if (mf.colClusters.size() == 1)
-					contLen = tmp.size() - companyLen - 1;
-				else
-					contLen = tmp.size() - companyLen - 1 - mf.colClusters[1].size();
-				for (int i = 0; i < contLen; i++)
-					colOutput[i + 5] = tmp[companyLen + 1 + i];
-
-				if (mf.colClusters.size() > 1)
-				{
-					for (int j = 0; j < 4 && j < mf.colClusters[1].size(); j++)
-						colOutput[j + 13] = tmp[contLen + companyLen + j + 1];
-				}
-
-				strcpy(output, colOutput.c_str());
-				return true;
-			}
-
-		}
-		else {
-			return false;
-		}
-	}
-	if (mode == 1)	//FCOL_MODE
-	{
-		if (mf.colClusters.size() != 0)
-		{
-			for (int j = 0; j < mf.colResult.size(); j++)
-			{
-				Mat tmpImg(srcImg, mf.colResult[j]);
-				imwrite(tmpSaveDir + to_string(j) + ".jpg", tmpImg);
-			}
-			alex_request(tmpSaveDir, tmp);
-
-			if (tmp.size() == 0)
-				return false;
-			else {
-				int companyLen = 3;
-				for (; companyLen >= 0; companyLen--)
-				{
-					if (tmp[companyLen] < '0' || tmp[companyLen] > '9')
-						break;
-				}
-				for (int i = 0; i <= companyLen; i++)
-					colOutput[i] = tmp[i];
-
-				int contLen = 0;
-				if (mf.colClusters.size() == 1)
-					contLen = tmp.size() - companyLen - 1;
-				else
-					contLen = tmp.size() - companyLen - 1 - mf.colClusters[1].size();
-				for (int i = 0; i < contLen; i++)
-					colOutput[i + 5] = tmp[companyLen + 1 + i];
-
-				if (mf.colClusters.size() > 1)
-				{
-					for (int j = 0; j < 4 && j < mf.colClusters[1].size(); j++)
-						colOutput[j + 13] = tmp[contLen + companyLen + j + 1];
-				}
-
-				strcpy(output, colOutput.c_str());
-				return true;
-			}
-		}
-		else
-			return false;
-	}
-	if (mode == 2)	// FROW_MODE
-	{
-		vector<east_bndbox> east_boxes;
-		vector<Rect> mser_boxes;
-		vector<Rect> ctpn_boxes;
-		east_request(deeplabImgPath, east_boxes);
-		Mat deeplabimg = cv::imread(deeplabImgPath);
-		Mat deeplabgrayimg;
-		cv::cvtColor(deeplabimg, deeplabgrayimg, CV_BGR2GRAY);
-		mser_boxes = getMSER(deeplabgrayimg, mserThres, mserMinArea, mserMaxArea);
-
-		NumberDetector* detector = new NumberDetector(deeplabImgPath, ctpn_boxes, east_boxes, mser_boxes, deeplabBbox);
-
-		string output_str = detector->detectRowNumber_front(tmpSaveDir);
-		strcpy(output, output_str.c_str());
-		return true;
-	}
-
-	return false;
-}
-
 
 bool detect(char* output, const char* input, int side) {
 	string imgpath(input);

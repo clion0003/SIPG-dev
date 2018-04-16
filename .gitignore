@@ -7,6 +7,7 @@ thirdparty/*
 
 src/DetectRecog/x64/
 src/DetectRecog/DetectRecog/x64/
+src/ccq
 *.sdf
 
 *pyc
@@ -272,3 +273,4 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+*.jpg
