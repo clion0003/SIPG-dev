@@ -25,8 +25,8 @@ def recog(imgpath):
 	global transformer
 	image = Image.open(imgpath).convert('L')
 	image = transformer(image)
-	if torch.cuda.is_available():
-	    image = image.cuda()
+	#if torch.cuda.is_available():
+	#    image = image.cuda()
 	image = image.view(1, *image.size())
 	image = Variable(image)
 

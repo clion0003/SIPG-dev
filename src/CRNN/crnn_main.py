@@ -53,8 +53,8 @@ torch.manual_seed(opt.manualSeed)
 
 cudnn.benchmark = True
 
-if torch.cuda.is_available() and not opt.cuda:
-    print("WARNING: You have a CUDA device, so you should probably run with --cuda")
+#if torch.cuda.is_available() and not opt.cuda:
+#    print("WARNING: You have a CUDA device, so you should probably run with --cuda")
 
 train_dataset = dataset.lmdbDataset(root=opt.trainroot)
 assert train_dataset
@@ -98,11 +98,11 @@ image = torch.FloatTensor(opt.batchSize, 3, opt.imgH, opt.imgH)
 text = torch.IntTensor(opt.batchSize * 5)
 length = torch.IntTensor(opt.batchSize)
 
-if opt.cuda:
-    crnn.cuda()
-    crnn = torch.nn.DataParallel(crnn, device_ids=range(opt.ngpu))
-    image = image.cuda()
-    criterion = criterion.cuda()
+#if opt.cuda:
+#    crnn.cuda()
+#    crnn = torch.nn.DataParallel(crnn, device_ids=range(opt.ngpu))
+#    image = image.cuda()
+#    criterion = criterion.cuda()
 
 image = Variable(image)
 text = Variable(text)
