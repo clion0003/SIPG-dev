@@ -285,7 +285,7 @@ string NumberDetector::detectVerticalNumber(string savepath) {
 	}
 	string recog_result;
 	alex_request(savepath, recog_result);
-
+	
 	return recog_result;
 
 
@@ -807,6 +807,8 @@ string NumberDetector::detectRowNumber_front(string imgsavepath) {
 
 	for (int i = 1; i < strs.size(); i++)
 		output_str = output_str + " " + strs[i];
+	std::transform(output_str.begin(), output_str.end(), output_str.begin(), ::toupper);
+	return output_str;
 
 //	count = 0;
 //
@@ -908,8 +910,8 @@ string NumberDetector::detectRowNumber_front(string imgsavepath) {
 //	cv::imshow("CLUSTER", showimg5);
 //	cv::waitKey(0);
 //#endif
-	std::transform(output_str.begin(), output_str.end(), output_str.begin(), ::toupper);
-	return output_str;
+//	std::transform(output_str.begin(), output_str.end(), output_str.begin(), ::toupper);
+//	return output_str;
 }
 
 void NumberDetector::locateNumber(vector<east_bndbox>& east_boxes, vector<Rect> cluster, vector<Rect>& boxes) {

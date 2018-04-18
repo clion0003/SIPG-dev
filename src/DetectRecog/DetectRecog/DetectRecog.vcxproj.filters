@@ -57,14 +57,14 @@
     <ClCompile Include="detect\recallratio.cpp">
       <Filter>Source Files\detect</Filter>
     </ClCompile>
-    <ClCompile Include="detect\Source.cpp">
-      <Filter>Source Files\detect</Filter>
-    </ClCompile>
     <ClCompile Include="detect\synth.cpp">
       <Filter>Source Files\detect</Filter>
     </ClCompile>
     <ClCompile Include="detect\utils.cpp">
       <Filter>Source Files\detect</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

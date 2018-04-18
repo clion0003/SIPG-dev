@@ -39,13 +39,13 @@ int front_classifier_request(string imgpath, std::vector<bool>& results) {
 
 	Document json;
 	json.Parse(recvBuf);
-	printf("\n%s\n", recvBuf);
+	//printf("\n%s\n", recvBuf);
 
 	for (Value::ConstMemberIterator itr = json.MemberBegin();
 	itr != json.MemberEnd(); ++itr)
 	{
-		printf("Type of member %s is %s\n",
-			itr->name.GetString(), kTypeNames[itr->value.GetType()]);
+		//printf("Type of member %s is %s\n",
+		//	itr->name.GetString(), kTypeNames[itr->value.GetType()]);
 	}
 
 	for (int j = 0; j < json["strnum"].GetInt(); j++) {
@@ -79,7 +79,7 @@ int east_request(string imgpath, std::vector<east_bndbox>& boxes) {
 	
 	Document json;
 	json.Parse(recvBuf);
-	printf("\n%s\n", recvBuf);
+	//printf("\n%s\n", recvBuf);
 	
 	static const char* kTypeNames[] =
 	{ "Null", "False", "True", "Object", "Array", "String", "Number" };
@@ -148,7 +148,7 @@ int ctpn_request(string imgpath,std::vector<cv::Rect>& rects, bool isRotate) {
 
 	Document json;
 	json.Parse(recvBuf);
-	printf("\n%s\n", recvBuf);
+	//printf("\n%s\n", recvBuf);
 
 	
 	//for (Value::ConstMemberIterator itr = json.MemberBegin();
@@ -164,7 +164,7 @@ int ctpn_request(string imgpath,std::vector<cv::Rect>& rects, bool isRotate) {
 			string charind = std::to_string(j);
 			const Value& array1 = json[charind.c_str()];
 			assert(array1.IsArray());
-			printf("%d\n", array1.Size());
+		//	printf("%d\n", array1.Size());
 
 			int y0 = array1[0].GetFloat();
 			int x0 = array1[1].GetFloat();
@@ -174,7 +174,7 @@ int ctpn_request(string imgpath,std::vector<cv::Rect>& rects, bool isRotate) {
 			cv::Rect rect(x0, y0, x1 - x0, y1 - y0);
 			rects.push_back(rect);
 			//for (Value::ConstValueIterator itr = array1.Begin(); itr != array1.End(); ++itr)
-			printf("\n");
+		//	printf("\n");
 		}
 	}
 	else {
@@ -183,7 +183,7 @@ int ctpn_request(string imgpath,std::vector<cv::Rect>& rects, bool isRotate) {
 			string charind = std::to_string(j);
 			const Value& array1 = json[charind.c_str()];
 			assert(array1.IsArray());
-			printf("%d\n", array1.Size());
+		//	printf("%d\n", array1.Size());
 
 			int x0 = array1[0].GetFloat();
 			int y0 = array1[1].GetFloat();
@@ -193,7 +193,7 @@ int ctpn_request(string imgpath,std::vector<cv::Rect>& rects, bool isRotate) {
 			cv::Rect rect(x0, y0, x1 - x0, y1 - y0);
 			rects.push_back(rect);
 			//for (Value::ConstValueIterator itr = array1.Begin(); itr != array1.End(); ++itr)
-			printf("\n");
+		//	printf("\n");
 		}
 	}
 	
@@ -229,7 +229,7 @@ int crnn_request(string imgpath, std::vector<string>& strs) {
 
 	Document json;
 	json.Parse(recvBuf);
-	printf("\n%s\n", recvBuf);
+	//printf("\n%s\n", recvBuf);
 
 	static const char* kTypeNames[] =
 	{ "Null", "False", "True", "Object", "Array", "String", "Number" };
@@ -247,7 +247,7 @@ int crnn_request(string imgpath, std::vector<string>& strs) {
 		//std::cout << array1.GetString() << std::endl;
 		strs.push_back(array1.GetString());
 
-		printf("\n");
+		//printf("\n");
 	}
 	//printf("%d\n", json[1].GetInt());
 	//printf("%d\n", json["2"].GetInt());
@@ -280,7 +280,7 @@ int deeplab_request(string imgpath, cv::Rect& rect) {
 
 	Document json;
 	json.Parse(recvBuf);
-	printf("\n%s\n", recvBuf);
+	//printf("\n%s\n", recvBuf);
 
 	static const char* kTypeNames[] =
 	{ "Null", "False", "True", "Object", "Array", "String", "Number" };
@@ -338,7 +338,7 @@ int alex_request(string imgpath, string& recog_result) {
 
 	Document json;
 	json.Parse(recvBuf);
-	printf("\n%s\n", recvBuf);
+	//printf("\n%s\n", recvBuf);
 
 	static const char* kTypeNames[] =
 	{ "Null", "False", "True", "Object", "Array", "String", "Number" };

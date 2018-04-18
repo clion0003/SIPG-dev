@@ -181,10 +181,12 @@ int getClusTypicalW(vector<cv::Rect> cluster)
 
 void clearDir(string path)
 {
-	boost::filesystem::path rootPath(path, boost::filesystem::native);
-	boost::filesystem::directory_iterator end_iter;
-	for (boost::filesystem::directory_iterator iter(rootPath); iter != end_iter; iter++)
-		boost::filesystem::remove(iter->path());
+	vector<string> files = getDirFileNames(path);
+	for (int i = 0; i < files.size(); i++)
+	{
+		string file = path + files[i];
+		remove(file.c_str());
+	}
 }
 
 int getMaxClusIdx(vector<vector<cv::Rect>> clus)

@@ -38,13 +38,13 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -134,9 +134,9 @@
     <ClCompile Include="detect\getMSER.cpp" />
     <ClCompile Include="detect\NumberDetector.cpp" />
     <ClCompile Include="detect\recallratio.cpp" />
-    <ClCompile Include="detect\Source.cpp" />
     <ClCompile Include="detect\synth.cpp" />
     <ClCompile Include="detect\utils.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="side_detect\east_filter.cpp" />
     <ClCompile Include="side_detect\mser_filter.cpp" />
     <ClCompile Include="side_detect\side_detect.cpp" />

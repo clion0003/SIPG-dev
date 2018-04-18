@@ -63,7 +63,7 @@ int SynthDetector::synthRes(vector<vector<cv::Rect>> &mserRes, vector<vector<cv:
 	for (int i = 0; i < mserRes.size(); i++)
 		for (int j = 0; j < mserRes[i].size(); j++)
 		{
-			cout << mserRes[i][j].width << endl;
+			//cout << mserRes[i][j].width << endl;
 			if (mserRes[i][j].height != 0)
 			{
 				cv::Mat tmpImg(srcImg, mserRes[i][j]);

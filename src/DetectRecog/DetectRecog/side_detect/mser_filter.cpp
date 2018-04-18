@@ -578,8 +578,11 @@ int MserFilter::buildColResult(void)
 	// 根据箱号和箱型间的关系，补充一下箱型数据
 
 	colClus[1].clear();
-	colClus[1].assign(colClus[0].begin() + 4, colClus[0].end());
-	colClus[0].resize(4);
+	if (colClus[0].size() > 4)
+	{
+		colClus[1].assign(colClus[0].begin() + 4, colClus[0].end());
+		colClus[0].resize(4);
+	}
 	return colClus[0].size() + colClus[1].size();
 }
 
@@ -645,7 +648,7 @@ void MserFilter::colSelfPatch(vector<cv::Rect>& tmpBboxes, int mainCharH, int ma
 		Rect leastUp = tmpClus[i - 1].back();	//上面一个聚类中最下面的一个
 		int leastDis = getMinYDis(tmpClus[i][0], leastUp);
 		double gapRatio = leastDis * 1.0 / mainCharH;
-		cout << gapRatio << endl;
+		//cout << gapRatio << endl;
 		if (abs(gapRatio - round(gapRatio)) < 0.2+ round(gapRatio)*0.1)	//若这个距离是一个字符高度的整数倍
 			cnt = round(gapRatio);
 		if (cnt > 0)	// 若两个合并后确实能得到长度为4或者6的结果

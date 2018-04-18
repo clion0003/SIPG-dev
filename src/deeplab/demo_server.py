@@ -11,7 +11,7 @@ import postprocess
 tmpPath = os.path.join('.', 'tmp')
 
 #caffe.set_device(0)
-caffe.set_mode_gpu()
+caffe.set_mode_cpu()
 prototxt = os.path.join('.', 'config', 'test.prototxt')
 model = '../../model_para/deeplab/train_iter_1000.caffemodel'
 net = caffe.Net(prototxt, model, caffe.TEST)

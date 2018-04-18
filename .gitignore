@@ -5,9 +5,11 @@ model_para/*
 thirdparty/*
 !/thirdparty/readme.md
 
+src/deeplab/tmp/
 src/DetectRecog/x64/
 src/DetectRecog/DetectRecog/x64/
 src/ccq
+src/DetectRecog/.vs/
 *.sdf
 
 *pyc
@@ -276,3 +278,10 @@ paket-files/
 __pycache__/
 *.pyc
 
+src/DetectRecog/DetectRecog/main.cpp
+src/deeplab/tmp/test_id.txt
+src/deeplab/tmp/test.txt
+src/DetectRecog/.vs/DetectRecog/v14/.suo
+src/DetectRecog/.vs/DetectRecog/v14/.suo
+src/deeplab/tmp/test.txt
+src/deeplab/tmp/test_id.txt

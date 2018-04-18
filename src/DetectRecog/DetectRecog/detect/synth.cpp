@@ -376,7 +376,8 @@ string detectRegion(string& imgpath, vector<east_bndbox>& east_boxes, Rect deepl
 
 	for (int i = 1; i < strs.size(); i++)
 		output_str = output_str + " " + strs[i];
-
+	std::transform(output_str.begin(), output_str.end(), output_str.begin(), ::toupper);
+	return output_str;
 
 //	ccq delete
 //	for (auto rect : upboxes) {
@@ -490,8 +491,8 @@ string detectRegion(string& imgpath, vector<east_bndbox>& east_boxes, Rect deepl
 //	cv::imshow("CLUSTER", showimg5);
 //	cv::waitKey(0);
 //#endif
-	std::transform(output_str.begin(), output_str.end(),output_str.begin(), ::toupper);
-	return output_str;
+//	std::transform(output_str.begin(), output_str.end(),output_str.begin(), ::toupper);
+//	return output_str;
 }
 
 
@@ -581,6 +582,7 @@ bool detect(char* output, const char* input, int side) {
 	default:
 		return false;
 	}
+	DeleteFile(deeplab_imgpath.c_str());
 
 	end = clock();
 	
