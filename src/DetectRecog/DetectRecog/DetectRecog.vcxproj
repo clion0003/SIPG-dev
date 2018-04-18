@@ -77,8 +77,8 @@
     <LibraryPath>..\..\..\thirdparty\Boost\lib64-msvc-14.0;..\..\..\thirdparty\OpenCV\x64\vc14\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>D:\thirdparty\Boost;C:\cppLib\include;D:\thirdparty\OpenCV\include;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\thirdparty\Boost\lib64-msvc-14.0;D:\thirdparty\OpenCV\x64\vc14\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>..\..\..\thirdparty\Boost;..\..\..\thirdparty\JsonLib\include;..\..\..\thirdparty\OpenCV\include;$(IncludePath)</IncludePath>
+    <LibraryPath>..\..\..\thirdparty\Boost\lib64-msvc-14.0;..\..\..\thirdparty\OpenCV\x64\vc14\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -136,13 +136,13 @@
     <ClCompile Include="detect\recallratio.cpp" />
     <ClCompile Include="detect\synth.cpp" />
     <ClCompile Include="detect\utils.cpp" />
-    <ClCompile Include="main.cpp" />
     <ClCompile Include="side_detect\east_filter.cpp" />
     <ClCompile Include="side_detect\mser_filter.cpp" />
     <ClCompile Include="side_detect\side_detect.cpp" />
     <ClCompile Include="side_detect\side_utils.cpp" />
     <ClCompile Include="side_detect\synth_detector.cpp" />
     <ClCompile Include="socketcpp\tcpClient.cpp" />
+    <ClCompile Include="test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="detect\colors.h" />

@@ -9,7 +9,7 @@ import os
 import json
 from socket import *
 import sys
-def front_classifier_server():
+def front_classifier_server(gpu_memory_size):
     HOST = ''
     PORT = 6006
     BUFSIZ = 1024
@@ -37,7 +37,7 @@ def front_classifier_server():
 
         imgpaths = [os.path.join(imgsavepath, f) for f in os.listdir(imgsavepath)]
         print (imgpaths)
-        results = classifier.predict(imgpaths)
+        results = classifier.predict(imgpaths, gpu_memory_size)
         response_json = {}
 
         response_json={ str(index) : int(item) for index, item in enumerate(results)}
@@ -53,9 +53,14 @@ def front_classifier_server():
     sock.close()
 
 if __name__ == '__main__':
-    print('server started!')
-    #init()
-    front_classifier_server()
+    if len(sys.argv) == 2:
+        print('server started!')
+        #init()
+        front_classifier_server(int(sys.argv[1]))
+    else:
+        print('Usage: python demo_server.py [gpu_memory_size]')
+        print('#gpu_memory_size: 2/4/6/8/12, presents memory size(GB) of your GPU card.')
+        print('#example: python demo_server.py 6')
 
 def demo():
     '''测试demo，演示了一次预测test_img文件路径下的所有图片的正反面'''
