@@ -14,12 +14,14 @@ int main() {
     cout << "helloworld" << endl;
     vector<bool> results;
     string path = "G:\\xianghao\\0001\\";
+   /*
     front_classifier_request(path, results);
     for (auto it : results) {
         cout << it << endl;
     }
-    /*
+    */
     vector<string> fileNames = getDirFileNames(path);
+    
     for (auto it : fileNames) {
         clock_t start = clock();
         char buf[100];
@@ -30,7 +32,7 @@ int main() {
         clock_t end = clock();
         cout << "Time: " << end - start << "ms" << endl;
     }
-    */
+   
     system("pause");
     return 0;
 }
