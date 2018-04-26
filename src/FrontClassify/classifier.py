@@ -232,15 +232,18 @@ def resnet_model_fn(features, labels, mode, params):
         train_op=train_op,
         eval_metric_ops=metrics)
 
-def predict(img_path, show_img=False):
+def predict(img_path, gpu_memory_size=6, show_img=False):
     '''Predict interface'''
+    # This resnet model needs about 1GB GPU memory, so we accept a argument "gpu_memory_size" to get user memory size.
+    gpu_memory_fraction = 1/gpu_memory_size 
+
     # Using the Winograd non-fused algorithms provides a small performance boost.
     os.environ['TF_ENABLE_WINOGRAD_NONFUSED'] = '1'
     # Reset classifier 
     resnet_classifier = tf.estimator.Estimator(
         model_fn=resnet_model_fn, 
         model_dir='../../model_para/FrontClassify/resnet_model', 
-        config=tf.estimator.RunConfig(save_checkpoints_secs=1e9, session_config=tf.ConfigProto(gpu_options=tf.GPUOptions(per_process_gpu_memory_fraction=0.5))),
+        config=tf.estimator.RunConfig(save_checkpoints_secs=1e9, session_config=tf.ConfigProto(gpu_options=tf.GPUOptions(per_process_gpu_memory_fraction=gpu_memory_fraction))),
         params={
           'resnet_size': _RESNET_SIZE,
           'data_format': None,

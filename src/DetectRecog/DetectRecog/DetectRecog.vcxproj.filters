@@ -63,7 +63,7 @@
     <ClCompile Include="detect\utils.cpp">
       <Filter>Source Files\detect</Filter>
     </ClCompile>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="test.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

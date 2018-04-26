@@ -284,3 +284,5 @@ src/deeplab/tmp/test.txt
 src/DetectRecog/.vs/DetectRecog/v14/.suo
 src/DetectRecog/.vs/DetectRecog/v14/.suo
 src/DetectRecog/DetectRecog/side_detect/main.cpp
+
+myserver.py
