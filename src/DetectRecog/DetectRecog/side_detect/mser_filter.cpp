@@ -10,7 +10,6 @@ MserFilter::MserFilter(Mat srcImg, Rect deeplabBbox)
 	Ptr<MSER> mser = MSER::create(5, 50, 500, 0.4);
 	mser->detectRegions(grayImg, msers, bboxes);
 	
-
 	//设定阈值
 	double heightRatio = (double(deeplabBbox.height)) / srcImg.rows;
 	//对于另一个码头摄像机位置有时候过高进行一次校正
@@ -103,6 +102,7 @@ void MserFilter::drawOnSrcImg(string outputPath, vector<vector<cv::Rect>> clus)
 
 int MserFilter::filter(void)
 {
+	drawBboxes(debugSavePrefix + "_0_.jpg", bboxes);
 	deeplabFilter();
 	singleFilter();
 	clusFilter();
@@ -169,7 +169,9 @@ void MserFilter::clusFilter(void)
 {
 	// 将bbox分两个方向聚类，聚类的结果为MserFilter成员
 	cluster(mserWidthHuge*2.5, bboxes, rowClus, ROW_MODE);
+	drawClus(debugSavePrefix + "_rowClus.jpg", rowClus);
 	cluster(mserHeightHuge*4, bboxes, colClus, COL_MODE);
+	drawClus(debugSavePrefix + "_colClus.jpg", colClus);
 	
 	int mainRowSize = clusProcess(ROW_MODE);
 	int mainColsize = clusProcess(COL_MODE);
@@ -541,11 +543,14 @@ void MserFilter::findMainCol(vector<Rect>& mainCol, int &mainCharH, int &mainCha
 				&& yCenter < mainBbox.y && yCenter > mainBbox.y + mainBbox.height)
 				candiBbox.insert(candiBbox.end(), colClus[i].begin(), colClus[i].end());
 	}
+
+	
 	mainCol.insert(mainCol.end(), candiBbox.begin(), candiBbox.end());
 	colReDiv(mainCol);	//对于得到的箱号等数据进行异常点去除，补充未检测点等工作
 	mainCharH = getClusTypicalH(mainCol), mainCharW = getClusTypicalW(mainCol);
-	rmColOutlier(mainCol, mainCharH, mainCharW, CONTAINER_ID);
-	colSelfPatch(mainCol, mainCharH, mainCharW, CONTAINER_ID);
+	rmColOutlier(mainCol, mainCharH, mainCharW, CONTAINER_ID);	
+	colSelfPatch(mainCol, mainCharH, mainCharW, CONTAINER_ID); 
+	
 }
 
 void MserFilter::getByMainCol(vector<Rect> mainCol, int mainCharH, int mainCharW)
@@ -666,7 +671,6 @@ void MserFilter::colSelfPatch(vector<cv::Rect>& tmpBboxes, int mainCharH, int ma
 		return;
 	vector<vector<cv::Rect>> tmpClus;
 	simpleClus(tmpClus, tmpBboxes, 0.22*mainCharH);
-
 	bool allNormal = true;			//判断结果是否需要做补充处理
 	vector<int> dis;
 	sort(tmpBboxes.begin(), tmpBboxes.end(), sideSortByY);
@@ -687,7 +691,7 @@ void MserFilter::colSelfPatch(vector<cv::Rect>& tmpBboxes, int mainCharH, int ma
 		midPatch(tmpClus, mainCharH, mainCharW);	//进行补充
 		if (mode == CONTAINER_ID)
 			sidePatch(tmpClus, mainCharH, mainCharW);
-		
+
 		vector<vector<Rect>> tc(tmpClus);
 		tmpClus.clear();
 		int maxIdx = getMaxClusIdx(tc);
@@ -695,13 +699,13 @@ void MserFilter::colSelfPatch(vector<cv::Rect>& tmpBboxes, int mainCharH, int ma
 		if (mode == CONTAINER_ID)
 		{
 			if (maxIdx - 1 >= 0 && tc[maxIdx].size() != 10)
-				tmpClus.push_back(tc[maxIdx-1]);
+				tmpClus.push_back(tc[maxIdx - 1]);
 			if (maxIdx + 1 < tc.size())
-				tmpClus.push_back(tc[maxIdx+1]);
+				tmpClus.push_back(tc[maxIdx + 1]);
 		}
 	}
 	adjustBbox(tmpClus, mainCharH, mainCharW);			//自己再对这些结果中的cluster进行一次分割，得到更好的分割结果
-
+	
 	tmpBboxes.clear();								//将结果汇总
 	for (int i = 0; i < tmpClus.size(); i++)
 		tmpBboxes.insert(tmpBboxes.end(), tmpClus[i].begin(), tmpClus[i].end());
@@ -808,15 +812,15 @@ void MserFilter::adjustBbox(vector<vector<cv::Rect>> &clus, int mainCharH, int m
 		else
 		{
 			sort(clus[i].begin(), clus[i].end(), sideSortByY);	//计算y方向信息
-			int upBorder = clus[i][0].y, botBorder = clus[i].back().y + clus[i].back().height;
+			int upBorder = clus[i][0].y, botBorder = clus[i].back().y + clus[i].back().height; 
 			if (clus[i][0].height < 0.85*mainCharH && clus[i][1].y - 1.1*mainCharH < clus[i][0].y)
 				upBorder = clus[i][1].y - 1.1*mainCharH;
-			if (clus[i].back().height < 0.85*mainCharH && clus[i][clus.size() - 2].y + clus[i][clus.size() - 2].height + 1.1*mainCharH > clus[i].back().height + clus[i].back().y)
-				botBorder = clus[i][clus.size() - 2].y + clus[i][clus.size() - 2].height + 1.1*mainCharH;
+			if (clus[i].back().height < 0.85*mainCharH && clus[i][clus[i].size() - 2].y + clus[i][clus[i].size() - 2].height + 1.1*mainCharH > clus[i].back().height + clus[i].back().y)
+				botBorder = clus[i][clus[i].size() - 2].y + clus[i][clus[i].size() - 2].height + 1.1*mainCharH;
 			double avgHeight = (botBorder - upBorder)*1.0 / clus[i].size();
 
 			int leftBorder = 10000, rightBorder = 0;	//计算x方向信息，此处leftBorder指的是矩形中线坐标
-			double topHalf = 0, bottomHalf = 0;
+			double topHalf = 0, bottomHalf = 0;			
 			for (int j = 0; j < clus[i].size(); j++)
 			{
 				if (j + 1 < (clus[i].size()+1) / 2.0)
