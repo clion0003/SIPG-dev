@@ -8,30 +8,42 @@
 #include <iostream>
 #include "../socketcpp/tcpClient.h"
 #include "../detect/MyTypes.h"
-
-using namespace std;
+#include "side_utils.h"
+#include "side_config.h"
 
 typedef struct east_bndbox EastBbox;
 
 class EastFilter
 {
 public:
+	EastFilter(string imgPath, cv::Rect deeplabBbox, std::vector<EastBbox> eastBboxes);
 	EastFilter(string imgPath, cv::Rect deeplabBbox);
-	void drawBboxes(string outputPath);
+	void drawBboxes(string outputPath, std::vector<cv::Rect> bboxes);
+	void drawBboxes(string outputPath, std::vector<std::vector<cv::Rect>> clus);
 	void filter(void);
+
+public:
+	std::vector<std::vector<cv::Rect>> clus;
+	string debugSavePrefix;
+
 private:
-	vector<cv::Rect> bboxes;
-	vector<vector<cv::Rect>> clusters;
-	vector<EastBbox> eastBboxes;
+	std::vector<cv::Rect> bboxes;
+	std::vector<std::vector<cv::Rect>> clusters;
+	std::vector<EastBbox> eastBboxes;
 	cv::Rect deeplabBbox;
 	cv::Mat srcImg;
 
 	// ãÐÖµ
-	double mserHeightSmall, mserHeightHuge, mserWidthHuge;
+	double eastHeightSmall, eastHeightHuge, eastWidthHuge;
+
 private:
 	cv::Rect eastbox2rect(EastBbox bbox);
 	void deeplabFilter(void);
 	void singleFilter(void);
 	void clusterFilter(void);
-	bool isClose(cv::Rect r1, cv::Rect r2);
+	void cluster(int disThres, std::vector<cv::Rect> bboxes, std::vector<std::vector<cv::Rect>>& clus, int mode);
+	bool isClusterable(cv::Rect r1, cv::Rect r2, int disThres, int mode);
+
+	void findMainRegion(std::vector<cv::Rect>& mainRegion);
+	void buildResult(std::vector<cv::Rect> mainRegion);
 };

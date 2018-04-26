@@ -1,6 +1,6 @@
 #include "side_utils.h"
 
-vector<string> getDirFileNames(string dirPath)
+vector<string> getDirFileNames(string dirPath)	//只有文件名，而不包含路径
 {
 	intptr_t handle;
 	_finddata_t findData;
@@ -64,8 +64,8 @@ bool sortByW(cv::Rect r1, cv::Rect r2)
 
 bool clusSortByY(vector<cv::Rect> c1, vector<cv::Rect> c2)
 {
-	//sort(c1.begin(), c1.end(), sortByY);
-	//sort(c2.begin(), c2.end(), sortByY);
+	sort(c1.begin(), c1.end(), sideSortByY);
+	sort(c2.begin(), c2.end(), sideSortByY);
 	return c1[0].y < c2[0].y;
 }
 
@@ -188,10 +188,11 @@ void clearDir(string path)
 		remove(file.c_str());
 	}
 }
-
-int getMaxClusIdx(vector<vector<cv::Rect>> clus)
+	
+int getMaxClusIdx(vector<vector<cv::Rect>> clus)	// 取最大的聚类的idx，同样大小则取y靠下的那个
 {
 	int maxLen = 0, idx = 0;
+	sort(clus.begin(), clus.end(), clusSortByY);
 	for (int i = 0; i < clus.size(); i++)
 		if (maxLen <= clus[i].size())
 		{

@@ -77,8 +77,8 @@
     <LibraryPath>..\..\..\thirdparty\Boost\lib64-msvc-14.0;..\..\..\thirdparty\OpenCV\x64\vc14\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>D:\thirdparty\Boost;C:\cppLib\include;D:\thirdparty\OpenCV\include;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\thirdparty\Boost\lib64-msvc-14.0;D:\thirdparty\OpenCV\x64\vc14\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>..\..\..\thirdparty\Boost;..\..\..\thirdparty\OpenCV\include;..\..\..\thirdparty\JsonLib\include;$(IncludePath)</IncludePath>
+    <LibraryPath>..\..\..\thirdparty\Boost\lib64-msvc-14.0;..\..\..\thirdparty\OpenCV\x64\vc14\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

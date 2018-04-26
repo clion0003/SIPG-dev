@@ -5,11 +5,11 @@ MserFilter::MserFilter(Mat srcImg, Rect deeplabBbox)
 {
 	Mat grayImg = Mat::zeros(srcImg.size(), CV_8UC1);
 	cvtColor(srcImg, grayImg, COLOR_BGR2GRAY);
-
 	this->srcImg = srcImg;
 	this->deeplabBbox = deeplabBbox;
 	Ptr<MSER> mser = MSER::create(5, 50, 500, 0.4);
 	mser->detectRegions(grayImg, msers, bboxes);
+	
 
 	//Éè¶¨ãĞÖµ
 	double heightRatio = (double(deeplabBbox.height)) / srcImg.rows;
@@ -80,8 +80,8 @@ void MserFilter::drawClus(string outputPath, vector<vector<Rect>> clus)
 			int color = (240 / clusNum) * clusCnt;
 			for (int j = 0; j < clus[i].size(); j++)
 			{
-				color = 250;
-				rectangle(mserImg, clus[i][j], color, 1, 8, 0);
+				//color = 250;
+				rectangle(mserImg, clus[i][j], color, CV_FILLED, 8, 0);
 			}
 		}
 	}
@@ -91,11 +91,12 @@ void MserFilter::drawClus(string outputPath, vector<vector<Rect>> clus)
 	imwrite(outputPath, mserImg);
 }
 
-void MserFilter::drawResult(string outputPath, vector<Rect> result)
+void MserFilter::drawOnSrcImg(string outputPath, vector<vector<cv::Rect>> clus)
 {
 	Mat resImg = srcImg.clone();
-	for (int i = 0; i < result.size(); i++)
-		rectangle(resImg, result[i], Scalar(0, 255, 0), 1, 8, 0);
+	for (int i = 0; i < clus.size(); i++)
+		for (int j = 0; j < clus[i].size(); j++)
+			rectangle(resImg, clus[i][j], Scalar(0, 255, 0), 1, 8, 0);
 	rectangle(resImg, deeplabBbox, Scalar(0, 255, 0), 1, 8, 0);
 	imwrite(outputPath, resImg);
 }
@@ -245,22 +246,22 @@ void MserFilter::cluster(int disThres, vector<Rect> bboxes, vector<vector<Rect>>
 int MserFilter::clusProcess(int mode)
 {
 	vector<Rect> mainClus;
-	if(mode == ROW_MODE)	//ÕÒµ½×î³¤µÄÀà
-		findMainRow(mainClus);
-	else
-		findMainCol(mainClus);
-
-	if (mainClus.size() <=4)
-		return 0;
-
-	if (mode == ROW_MODE)	//¸ù¾İ×î³¤µÄÀà×ö½øÒ»²½µÄfilterºÍpatch
+	
+	if (mode == ROW_MODE)	//ÕÒµ½×î³¤µÄÀà
 	{
+		findMainRow(mainClus);
+		if (mainClus.size() <= 4)
+			return 0;
 		getByMainRow(mainClus);
 		return buildRowResult();
 	}
 	else
 	{
-		getByMainCol(mainClus);
+		int mainCharH, mainCharW;
+		findMainCol(mainClus, mainCharH, mainCharW);
+		if (mainClus.size() <= 4)
+			return 0;
+		getByMainCol(mainClus, mainCharH, mainCharW);
 		return buildColResult();
 	}
 }
@@ -496,7 +497,7 @@ void MserFilter::mergeRowSmallBbox(vector<cv::Rect>& cluster)
 	}
 }
 
-void MserFilter::findMainCol(vector<Rect>& mainCol)
+void MserFilter::findMainCol(vector<Rect>& mainCol, int &mainCharH, int &mainCharW)
 {
 	if (colClus.size() == 0)
 		return;
@@ -515,7 +516,7 @@ void MserFilter::findMainCol(vector<Rect>& mainCol)
 		}
 	}
 
-	int mainColIdx = 0;	//²éÕÒ×î³¤ÁĞ
+	int mainColIdx = 0;	//²éÕÒ×î³¤ÁĞ£¬×÷Îª×î³õ²½µÄmainCol
 	sort(colClus.begin(), colClus.end(), sortByLen);	//´Ó³¤µ½¶ÌÅÅÁĞ
 	//Èç¹û¼¯×°ÏäÕû¸öÎ»ÖÃ¶¼³öÏÖÔÚ»­ÃæÖĞ£¬ÔòÒªÇómainCol±ØĞèÓĞÔªËØ´¦ÓÚ¼¯×°ÏäÉÏ°ë²¿£¬·ñÔòÔòÖ±½ÓÑ¡È¡×î³¤µÄÄÇ¸ö
 	if (!(deeplabBbox.y + deeplabBbox.height>0.99*srcImg.rows && deeplabBbox.y > srcImg.rows*0.5))	
@@ -526,57 +527,64 @@ void MserFilter::findMainCol(vector<Rect>& mainCol)
 				break;
 			}
 	mainCol.assign(colClus[mainColIdx].begin(), colClus[mainColIdx].end());
-}
 
-void MserFilter::getByMainCol(vector<Rect> mainCol)
-{
-	Rect mainBbox = getColClusBbox(mainCol);
-	int mainCharH = getClusTypicalH(mainCol), mainCharW = getClusTypicalW(mainCol);
+	Rect mainBbox = getColClusBbox(mainCol);		//»ñÈ¡ÓÉ´ËmainColµÃµ½µÄ²ÎÊı£¬½øĞĞ¸üÏ¸ÖÂµÄ²¹³ä
 	int mainXCenter = mainBbox.x + mainBbox.width*0.5;
-
 	colReDiv(mainCol);	//ÀûÓÃĞ£ÕıºóµÄmainColÀ´²éÕÒÏäĞÍ
-	vector<Rect> containerType;
-	for (int i = 0; colClus.begin()+i != colClus.end(); i++)	//É¾³ıÒ»Ğ©Àà
+	vector<Rect> candiBbox; //ÏäĞÍºÍ·ÀÖ¹ÏäºÅÎ´ÕÒÍêÈ«Ê±µÄÓÃÓÚ²¹³äµÄÊı¾İ
+	for (int i = 0; colClus.begin() + i != colClus.end(); i++)
 	{
 		Rect rtmp = getColClusBbox(colClus[i]);
 		int xCenter = rtmp.x + rtmp.width*0.5, yCenter = rtmp.y + rtmp.height*0.5;
 		if (mainCol.size() < 9)
 			if (xCenter >= mainBbox.x && xCenter <= mainBbox.x + mainBbox.width	//x·½ÏòÓĞÖØºÏ£¬ÇÒy·½ÏòÎŞÖØºÏ£¬±£Áô
-				&& yCenter < mainBbox.y && yCenter > mainBbox.y + mainBbox.height) 
-					continue;
-		if (abs(xCenter - mainXCenter) < 8 * mainCharW && abs(xCenter - mainXCenter) > 2 * mainCharW
-			&& yCenter >= mainBbox.y && yCenter <= mainBbox.y + mainBbox.height)	// Ë®Æ½·½ÏòÀëmainCol²»Ô¶Ò²²»Ì«½ü£¬ÇÒÊúÖ±·½ÏòÓĞÖØºÏ
-			containerType = getBetterCol(mainCol, containerType, colClus[i]);
+				&& yCenter < mainBbox.y && yCenter > mainBbox.y + mainBbox.height)
+				candiBbox.insert(candiBbox.end(), colClus[i].begin(), colClus[i].end());
+	}
+	mainCol.insert(mainCol.end(), candiBbox.begin(), candiBbox.end());
+	colReDiv(mainCol);	//¶ÔÓÚµÃµ½µÄÏäºÅµÈÊı¾İ½øĞĞÒì³£µãÈ¥³ı£¬²¹³äÎ´¼ì²âµãµÈ¹¤×÷
+	mainCharH = getClusTypicalH(mainCol), mainCharW = getClusTypicalW(mainCol);
+	rmColOutlier(mainCol, mainCharH, mainCharW, CONTAINER_ID);
+	colSelfPatch(mainCol, mainCharH, mainCharW, CONTAINER_ID);
+}
+
+void MserFilter::getByMainCol(vector<Rect> mainCol, int mainCharH, int mainCharW)
+{
+	Rect mainBbox = getColClusBbox(mainCol);
+	int mainXCenter = mainBbox.x + mainBbox.width*0.5;
+	vector<Rect> containerType;		//ÏäĞÍ
+	for (int i = 0; colClus.begin() + i != colClus.end(); i++)	//É¾³ıÒ»Ğ©Àà
+	{
+		vector<vector<Rect>> tc;
+		simpleClus(tc, colClus[i], 3*mainCharH);
+		sort(tc.begin(), tc.end(), sortByLen);
+		colClus[i].clear();
+		colClus[i].assign(tc[0].begin(), tc[0].end());
+		Rect rtmp = getColClusBbox(colClus[i]);
+		int xCenter = rtmp.x + rtmp.width*0.5, yCenter = rtmp.y + rtmp.height*0.5;
+		if (abs(xCenter - mainXCenter) < 10 * mainCharW && abs(xCenter - mainXCenter) > 2 * mainCharW
+			&& rtmp.y+rtmp.height > mainBbox.y && rtmp.y < mainBbox.y + mainBbox.height)	// Ë®Æ½·½ÏòÀëmainCol²»Ô¶Ò²²»Ì«½ü£¬ÇÒÊúÖ±·½ÏòÓĞÖØºÏ
+			containerType = getBetterCT(mainCol, containerType, colClus[i]);
 		colClus.erase(colClus.begin() + i);
 		i--;
 	}
 
-	vector<Rect> keptBbox;	//±»±£ÁôµÄBbox
-	for (int i = 0; i < colClus.size(); i++)
-		keptBbox.insert(keptBbox.end(), colClus[i].begin(), colClus[i].end());
+	if (containerType.size() != 0)
+	{
+		colReDiv(containerType);
+		rmColOutlier(containerType, mainCharH, mainCharW, CONTAINER_MOD);
+		colSelfPatch(containerType, mainCharH, mainCharW, CONTAINER_MOD);
+	}
+
 	colClus.clear();
 	colClus.resize(3);	//·Ö±ğ´ú±í¹«Ë¾ºÅ£¬ÏäºÅ£¬ÏäĞÍ 
 	colClus[0].assign(mainCol.begin(), mainCol.end());
-	colClus[1].insert(colClus[0].end(), keptBbox.begin(), keptBbox.end());
 	colClus[2].assign(containerType.begin(), containerType.end());
 }
 
-int MserFilter::buildColResult(void)
+int MserFilter::buildColResult(void)	//ÀûÓÃÏäºÅ¼ÓÏäĞÍ¼äµÄ¹ØÏµ²¹³äÏäĞÍ
 {
-	drawClus(savePath + "_00_t0.jpg", colClus);	
-	colReDiv(colClus[0]);	//¶ÔÓÚµÃµ½µÄÏäºÅµÈÊı¾İ½øĞĞÒì³£µãÈ¥³ı£¬²¹³äÎ´¼ì²âµãµÈ¹¤×÷
-	int mainCharH = getClusTypicalH(colClus[0]), mainCharW = getClusTypicalW(colClus[0]);
-	rmColOutlier(colClus[0], mainCharH, mainCharW);
-	colSelfPatch(colClus[0], mainCharH, mainCharW);
-	if (colClus[2].size() != 0)
-	{
-		colReDiv(colClus[2]);
-		rmColOutlier(colClus[2], mainCharH, mainCharW);
-		colSelfPatch(colClus[2], mainCharH, mainCharW);
-	}
-
 	// ¸ù¾İÏäºÅºÍÏäĞÍ¼äµÄ¹ØÏµ£¬²¹³äÒ»ÏÂÏäĞÍÊı¾İ
-
 	colClus[1].clear();
 	if (colClus[0].size() > 4)
 	{
@@ -586,17 +594,35 @@ int MserFilter::buildColResult(void)
 	return colClus[0].size() + colClus[1].size();
 }
 
-vector<cv::Rect> MserFilter::getBetterCol(vector<cv::Rect> mainClus, vector<cv::Rect> oldClus, vector<cv::Rect> newClus)
+// curClusÊÇµ±Ç°ÈÏÎªºÏÀíµÄÏäĞÍ£¬newClusÊÇºòÑ¡µÄ£¬ÒªÄÃ³öÀ´ºÍcurClus½øĞĞ±È½ÏµÄ
+vector<cv::Rect> MserFilter::getBetterCT(vector<cv::Rect> mainClus, vector<cv::Rect> curClus, vector<cv::Rect> newClus)
 {
 	int charW = getClusTypicalW(mainClus);	//»ñÈ¡Ò»ÏÂÕı³£µÄsize
 	int charH = getClusTypicalH(mainClus);
+
+	// ×ÔÅĞ¶Ï£¬¿´newClusÊÇ·ñÓĞ¿ÉÄÜÊÇÏäĞÍ
+	if (newClus[0].x < mainClus[0].x && newClus.size() < 3)	//¾­ÑéÀ´Ëµ£¬ÏäĞÍºÜÉÙÔÚ×ó±ß
+		return curClus;
+	if (deeplabBbox.x + deeplabBbox.width - newClus[0].x - newClus[0].width < 2*charW) //ÏäĞÍ²»Ó¦¸ÃÌ«Ìù×ÅdeeplabbboxµÄÓÒ±ß½ç
+		return curClus;
+	bool allBadFlag = true;
+	for (int i = 0; i < newClus.size(); i++)
+		if (newClus[i].width > 0.4*newClus[i].height)
+		{
+			allBadFlag = false;
+			break;
+		}
+	if (newClus.size() > 2 && allBadFlag == true)
+		return curClus;
+	
+	
+	// ºÍcurClus½øĞĞ±È½Ï£¬¿´¿´Ë­¸ü¿ÉÄÜÊÇÏäĞÍ
 	if (newClus.size() == 1)
 	{
-		if (newClus[0].height < 0.8*charH || newClus[0].height > 1.3*charH || newClus[0].width < 0.5*charW)
-			return oldClus;
+		if (newClus[0].height < 0.8*charH || newClus[0].height > 1.3*charH)
+			return curClus;
 	}
-
-	return oldClus.size() > newClus.size() ? oldClus : newClus;
+	return curClus.size() > newClus.size() ? curClus : newClus;
 }
 
 void MserFilter::colReDiv(vector<cv::Rect>& clus)	// ÏÈºÏ²¢ÊúÖ±·½ÏòÓĞÖØºÏµÄrect£¬ÔÙ½øĞĞ·Ö¸î
@@ -634,93 +660,51 @@ void MserFilter::colReDiv(vector<cv::Rect>& clus)	// ÏÈºÏ²¢ÊúÖ±·½ÏòÓĞÖØºÏµÄrect£
 	}
 }
 
-void MserFilter::colSelfPatch(vector<cv::Rect>& tmpBboxes, int mainCharH, int mainCharW)
+void MserFilter::colSelfPatch(vector<cv::Rect>& tmpBboxes, int mainCharH, int mainCharW, int mode)
 {
-	if (tmpBboxes.size() <= 1)
+	if (tmpBboxes.size() <= 1)		//Èç¹ûÕâ¸öclus±È½Ï´ó£¬Ôò½øĞĞÒ»´Î¸üÏ¸µÄ¾ÛÀà
 		return;
 	vector<vector<cv::Rect>> tmpClus;
 	simpleClus(tmpClus, tmpBboxes, 0.22*mainCharH);
-	drawClus(savePath + "_00_t1.jpg", tmpClus);
 
-	for (int i = 1; tmpClus.begin() + i != tmpClus.end(); i++)	// Ò»Ğ©¶ÏÁËµÄµØ·½µÄÌî³ä
+	bool allNormal = true;			//ÅĞ¶Ï½á¹ûÊÇ·ñĞèÒª×ö²¹³ä´¦Àí
+	vector<int> dis;
+	sort(tmpBboxes.begin(), tmpBboxes.end(), sideSortByY);
+	for (int i = 0; i < tmpBboxes.size(); i++)
 	{
-		int cnt = 0;
-		Rect leastUp = tmpClus[i - 1].back();	//ÉÏÃæÒ»¸ö¾ÛÀàÖĞ×îÏÂÃæµÄÒ»¸ö
-		int leastDis = getMinYDis(tmpClus[i][0], leastUp);
-		double gapRatio = leastDis * 1.0 / mainCharH;
-		//cout << gapRatio << endl;
-		if (abs(gapRatio - round(gapRatio)) < 0.2+ round(gapRatio)*0.1)	//ÈôÕâ¸ö¾àÀëÊÇÒ»¸ö×Ö·û¸ß¶ÈµÄÕûÊı±¶
-			cnt = round(gapRatio);
-		if (cnt > 0)	// ÈôÁ½¸öºÏ²¢ºóÈ·ÊµÄÜµÃµ½³¤¶ÈÎª4»òÕß6µÄ½á¹û
-			if((tmpBboxes.size() > 6 && i-1!=0 && cnt + tmpClus[i].size() + tmpClus[i - 1].size() == 6)	//È·±£Æä²»ÊÇ×îÉÏÃæµÄÄÇ¸öÀà²ÎÓë
-				|| cnt + tmpClus[i].size() + tmpClus[i - 1].size() == 4)
-			{
-				int avgH = leastDis / cnt;	// Éú³É½á¹û
-				for (int j = 0; j < cnt; j++)
-					tmpClus[i - 1].push_back(Rect(tmpClus[i][0].x, leastUp.y + leastUp.height + leastDis * j / cnt, tmpClus[i][0].width, avgH));
-				tmpClus[i - 1].insert(tmpClus[i - 1].end(), tmpClus[i].begin(), tmpClus[i].end());
-				tmpClus.erase(tmpClus.begin() + i);
-				i--;
-			}
-	}
-	drawClus(savePath + "_00_t2.jpg", tmpClus);
-	
-	int maxIdx = getMaxClusIdx(tmpClus);
-	if (tmpBboxes.size() > 7)	//ÏäºÅÄÇÒ»ÁĞ
-	{
-		if (tmpClus[maxIdx].size() < 6)	//ÏäºÅĞèÒª²¹³ä
+		if (tmpBboxes[i].height > 1.4*mainCharH || tmpBboxes[i].width > 1.7*mainCharW)
 		{
-			if (maxIdx - 1 >= 0 && tmpClus[maxIdx - 1].size() >= 4)	//ÀûÓÃ¹«Ë¾ºÅÀ´²¹³ä
-			{
-				Rect compNumBottom = tmpClus[maxIdx - 1].back();	//¹«Ë¾ºÅÖĞ×îÏÂÃæµÄbbox
-				patchByBorder(tmpClus[maxIdx], mainCharH, compNumBottom.y+compNumBottom.height, 6);
-			}
-			else if (maxIdx + 1 < tmpClus.size() && tmpClus[maxIdx + 1][0].width>0.8*mainCharW && tmpClus[maxIdx + 1][0].height>0.8*mainCharH)	// ÀûÓÃÑéÖ¤ÂëÀ´²¹³ä
-                patchByBorder(tmpClus[maxIdx], mainCharH, tmpClus[maxIdx+1][0].y, 6);
+			allNormal = false;
+			break;
 		}
-		if(tmpClus[maxIdx].size() == 6)	//¾­¹ı²¹³ä¹ıºó£¬ÏäºÅ³¤¶ÈÎª6£¬ÒÔ´ËÎª»ù×¼²¹³ä¹«Ë¾ºÅ£¬ÑéÖ¤Âë
+		if (i > 0)
+			dis.push_back(tmpBboxes[i].y - tmpBboxes[i - 1].y - tmpBboxes[i - 1].height);
+	}
+	sort(dis.begin(), dis.end(), greater<int>());	//½µĞòÅÅÁĞ
+
+	if (tmpBboxes.size() != 11 || allNormal == false || dis[2] > 0.4*mainCharH)		//»¹ÊÇĞèÒª½øĞĞ×ÔpatchµÄ
+	{
+		midPatch(tmpClus, mainCharH, mainCharW);	//½øĞĞ²¹³ä
+		if (mode == CONTAINER_ID)
+			sidePatch(tmpClus, mainCharH, mainCharW);
+		
+		vector<vector<Rect>> tc(tmpClus);
+		tmpClus.clear();
+		int maxIdx = getMaxClusIdx(tc);
+		tmpClus.push_back(tc[maxIdx]);
+		if (mode == CONTAINER_ID)
 		{
-			if (maxIdx - 1 >= 0 && tmpClus[maxIdx - 1].size() < 4)	// ¹«Ë¾ºÅ²»ÆëÈ«
-			{
-				patchByBorder(tmpClus[maxIdx - 1], mainCharH, tmpClus[maxIdx][0].y, 4);
-				drawClus(savePath + "_00_t3.jpg", tmpClus);
-			}
-            else if(maxIdx == 0 /* || maxIdx - 1¿Ï¶¨²»ÊÇ*/)   //Ã»ÓĞ¹«Ë¾ºÅ
-            {
-                int dis = 0.35*mainCharH;
-                if(maxIdx + 1 < tmpClus.size() && tmpClus[maxIdx + 1][0].width>0.8*mainCharW && tmpClus[maxIdx + 1][0].height>0.8*mainCharH)	//ÈôÓĞÑéÖ¤ÂëÔòÀûÓÃÑéÖ¤ÂëÀ´²¹³ä
-                    dis = tmpClus[maxIdx+1][0].y - tmpClus[maxIdx].back().y - tmpClus[maxIdx].back().height;
-                vector<cv::Rect> compNum;
-				for (int i = 1; i <= 4; i++)
-					compNum.insert(compNum.begin(), Rect(tmpClus[maxIdx][0].x, tmpClus[maxIdx][0].y - dis - mainCharH*i, tmpClus[maxIdx][0].width, mainCharH));
-                tmpClus.insert(tmpClus.begin()+maxIdx, compNum);
-                maxIdx ++;
-            }
-			if (maxIdx + 1 == tmpClus.size() || tmpClus[maxIdx + 1][0].y - tmpClus[maxIdx].back().y > 2 * mainCharH
-				|| tmpClus[maxIdx + 1][0].width<0.6*mainCharW || tmpClus[maxIdx + 1][0].height<0.6*mainCharH)	// Ã»ÓĞºÏÊÊµÄÑéÖ¤Âë
-			{
-				drawClus(savePath + "_00_t4.jpg", tmpClus);
-                int dis = 0.35*mainCharH;
-                if(maxIdx - 1>=0 && tmpClus[maxIdx - 1].size() == 4)//ÉÏ·½ÓĞÕıÈ·µÄ¹«Ë¾ºÅ£¬ÔòÒÀ¾İ´Ë¹«Ë¾ºÅ¼ÆËã¾àÀë
-                    dis = tmpClus[maxIdx][0].y - tmpClus[maxIdx-1].back().y - tmpClus[maxIdx-1].back().height;
-                Rect containNumBottom = tmpClus[maxIdx].back();
-                vector<cv::Rect> vertiNum{Rect(containNumBottom.x, containNumBottom.y + dis, containNumBottom.width, 1.2*mainCharH)};
-                tmpClus.insert(tmpClus.begin()+maxIdx+1, vertiNum);
-			}
+			if (maxIdx - 1 >= 0 && tc[maxIdx].size() != 10)
+				tmpClus.push_back(tc[maxIdx-1]);
+			if (maxIdx + 1 < tc.size())
+				tmpClus.push_back(tc[maxIdx+1]);
 		}
 	}
+	adjustBbox(tmpClus, mainCharH, mainCharW);			//×Ô¼ºÔÙ¶ÔÕâĞ©½á¹ûÖĞµÄcluster½øĞĞÒ»´Î·Ö¸î£¬µÃµ½¸üºÃµÄ·Ö¸î½á¹û
 
-	int allSize = tmpBboxes.size();	//»ãºÏÒ»ÏÂ½á¹û
-	tmpBboxes.clear();
-	tmpBboxes.insert(tmpBboxes.end(), tmpClus[maxIdx].begin(), tmpClus[maxIdx].end());
-	if (allSize > 7)
-	{
-		if(maxIdx - 1 >= 0)
-			tmpBboxes.insert(tmpBboxes.end(), tmpClus[maxIdx-1].begin(), tmpClus[maxIdx-1].end());
-		if(maxIdx + 1 < tmpClus.size())
-		tmpBboxes.insert(tmpBboxes.end(), tmpClus[maxIdx+1].begin(), tmpClus[maxIdx+1].end());
-	}
-
+	tmpBboxes.clear();								//½«½á¹û»ã×Ü
+	for (int i = 0; i < tmpClus.size(); i++)
+		tmpBboxes.insert(tmpBboxes.end(), tmpClus[i].begin(), tmpClus[i].end());
 	for (int i = 0; tmpBboxes.begin()+i!=tmpBboxes.end(); i++)	//×Ô¼º²¹³äµÄ¿ÉÄÜÓĞÔ½½çÁË£¬½øĞĞÒ»²¨É¾³ı
 	{
 		if (tmpBboxes[i].x < deeplabBbox.x || tmpBboxes[i].x + tmpBboxes[i].width > deeplabBbox.x + deeplabBbox.width
@@ -733,18 +717,145 @@ void MserFilter::colSelfPatch(vector<cv::Rect>& tmpBboxes, int mainCharH, int ma
 	sort(tmpBboxes.begin(), tmpBboxes.end(), sideSortByY);
 }
 
+void MserFilter::midPatch(vector<vector<cv::Rect>> &tmpClus, int mainCharH, int mainCharW)
+{
+	int allSize = 0;
+	for (int i = 0; i < tmpClus.size(); i++)
+		allSize += tmpClus[i].size();
+	for (int i = 1; tmpClus.begin() + i != tmpClus.end(); i++)	// Ò»Ğ©¶ÏÁËµÄµØ·½µÄÌî³ä£¬°ÑÁ½¸öclus²¢ÎªÒ»¸ö
+	{
+		int cnt = 0;
+		Rect leastUp = tmpClus[i - 1].back();	//ÉÏÃæÒ»¸ö¾ÛÀàÖĞ×îÏÂÃæµÄÒ»¸ö
+		int leastDis = getMinYDis(tmpClus[i][0], leastUp);
+		double gapRatio = leastDis * 1.0 / mainCharH;
+		if (abs(gapRatio - round(gapRatio)) < 0.2 + round(gapRatio)*0.1)	//ÈôÕâ¸ö¾àÀëÊÇÒ»¸ö×Ö·û¸ß¶ÈµÄÕûÊı±¶
+			cnt = round(gapRatio);
+		if (cnt > 0)	// ÈôÁ½¸öºÏ²¢ºóÈ·ÊµÄÜµÃµ½³¤¶ÈÎª4»òÕß6µÄ½á¹û
+			if ((allSize > 6 && i - 1 > 0 && cnt + tmpClus[i].size() + tmpClus[i - 1].size() == 6)	//È·±£Æä²»ÊÇ×îÉÏÃæµÄÄÇ¸öÀà²ÎÓë
+				|| cnt + tmpClus[i].size() + tmpClus[i - 1].size() == 4)	//´¦ÓÚÖĞ¼äÎ»ÖÃ
+			{
+				int avgH = leastDis / cnt;	// Éú³É½á¹û
+				for (int j = 0; j < cnt; j++)
+					tmpClus[i - 1].push_back(Rect(tmpClus[i][0].x, leastUp.y + leastUp.height + leastDis * j / cnt, tmpClus[i][0].width, avgH));
+				tmpClus[i - 1].insert(tmpClus[i - 1].end(), tmpClus[i].begin(), tmpClus[i].end());
+				tmpClus.erase(tmpClus.begin() + i);
+				i--;
+			}
+	}
+}
+
+void MserFilter::sidePatch(vector<vector<cv::Rect>> &tmpClus, int mainCharH, int mainCharW)
+{
+	int mainIdx = getContainerIdIdx(tmpClus, mainCharH);	//»ñÈ¡ÏäºÅµÄIdx
+	if (tmpClus[mainIdx].size() < 6)	//ÏäºÅĞèÒª²¹³ä
+	{
+		if (mainIdx - 1 >= 0 && tmpClus[mainIdx - 1].size() >= 4)	//ÀûÓÃ¹«Ë¾ºÅÀ´²¹³ä
+		{
+			Rect compNumBottom = tmpClus[mainIdx - 1].back();	//¹«Ë¾ºÅÖĞ×îÏÂÃæµÄbbox
+			patchByBorder(tmpClus[mainIdx], mainCharH, compNumBottom.y + compNumBottom.height, 6);
+		}
+		else if (mainIdx + 1 < tmpClus.size() && tmpClus[mainIdx + 1][0].width>0.8*mainCharW && tmpClus[mainIdx + 1][0].height>0.8*mainCharH)	// ÀûÓÃÑéÖ¤ÂëÀ´²¹³ä
+			patchByBorder(tmpClus[mainIdx], mainCharH, tmpClus[mainIdx + 1][0].y, 6);
+	}
+	if (tmpClus[mainIdx].size() == 6)	//¾­¹ı²¹³ä¹ıºó£¬ÏäºÅ³¤¶ÈÎª6£¬ÒÔ´ËÎª»ù×¼²¹³ä¹«Ë¾ºÅ£¬ÑéÖ¤Âë
+	{
+		if (mainIdx - 1 >= 0 && tmpClus[mainIdx - 1].size() < 4)	// ¹«Ë¾ºÅ²»ÆëÈ«
+		{
+			patchByBorder(tmpClus[mainIdx - 1], mainCharH, tmpClus[mainIdx][0].y, 4);
+		}
+		else if (mainIdx == 0 /* || maxIdx - 1¿Ï¶¨²»ÊÇ*/)   //Ã»ÓĞ¹«Ë¾ºÅ
+		{
+			int dis = 0.35*mainCharH;
+			if (mainIdx + 1 < tmpClus.size() && tmpClus[mainIdx + 1][0].width>0.8*mainCharW && tmpClus[mainIdx + 1][0].height>0.8*mainCharH)	//ÈôÓĞÑéÖ¤ÂëÔòÀûÓÃÑéÖ¤ÂëÀ´²¹³ä
+				dis = tmpClus[mainIdx + 1][0].y - tmpClus[mainIdx].back().y - tmpClus[mainIdx].back().height;
+			vector<cv::Rect> compNum;
+			for (int i = 1; i <= 4; i++)
+				compNum.insert(compNum.begin(), Rect(tmpClus[mainIdx][0].x, tmpClus[mainIdx][0].y - dis - mainCharH*i, tmpClus[mainIdx][0].width, mainCharH));
+			tmpClus.insert(tmpClus.begin() + mainIdx, compNum);
+			mainIdx++;
+		}
+		if (mainIdx + 1 == tmpClus.size() || tmpClus[mainIdx + 1][0].y - tmpClus[mainIdx].back().y > 2 * mainCharH
+			|| tmpClus[mainIdx + 1][0].width<0.6*mainCharW || tmpClus[mainIdx + 1][0].height<0.6*mainCharH)	// Ã»ÓĞºÏÊÊµÄÑéÖ¤Âë
+		{
+			int dis = 0.35*mainCharH;
+			if (mainIdx - 1 >= 0 && tmpClus[mainIdx - 1].size() == 4)//ÉÏ·½ÓĞÕıÈ·µÄ¹«Ë¾ºÅ£¬ÔòÒÀ¾İ´Ë¹«Ë¾ºÅ¼ÆËã¾àÀë
+				dis = tmpClus[mainIdx][0].y - tmpClus[mainIdx - 1].back().y - tmpClus[mainIdx - 1].back().height;
+			Rect containNumBottom = tmpClus[mainIdx].back();
+			vector<cv::Rect> vertiNum{ Rect(containNumBottom.x, containNumBottom.y+ containNumBottom.height + dis, containNumBottom.width, 1.2*mainCharH) };
+			tmpClus.insert(tmpClus.begin() + mainIdx + 1, vertiNum);
+		}
+	}
+}
+
+void MserFilter::adjustBbox(vector<vector<cv::Rect>> &clus, int mainCharH, int mainCharW)
+{
+	for (int i = 0; i < clus.size(); i++)
+	{
+		if (clus[i].size() < 2)
+		{
+			if (clus[i][0].width < 0.9*mainCharW)
+			{
+				clus[i][0].x = clus[i][0].x + clus[i][0].width*0.5 - 0.6*mainCharW;
+				clus[i][0].width = 1.3*mainCharW;
+			}
+			if (clus[i][0].height < 0.85*mainCharH)
+			{
+				clus[i][0].y = clus[i][0].y + clus[i][0].height*0.5 - 0.55*mainCharH;
+				clus[i][0].height = 1.1*mainCharH;
+			}
+			continue;
+		}
+		else
+		{
+			sort(clus[i].begin(), clus[i].end(), sideSortByY);	//¼ÆËãy·½ÏòĞÅÏ¢
+			int upBorder = clus[i][0].y, botBorder = clus[i].back().y + clus[i].back().height;
+			if (clus[i][0].height < 0.85*mainCharH && clus[i][1].y - 1.1*mainCharH < clus[i][0].y)
+				upBorder = clus[i][1].y - 1.1*mainCharH;
+			if (clus[i].back().height < 0.85*mainCharH && clus[i][clus.size() - 2].y + clus[i][clus.size() - 2].height + 1.1*mainCharH > clus[i].back().height + clus[i].back().y)
+				botBorder = clus[i][clus.size() - 2].y + clus[i][clus.size() - 2].height + 1.1*mainCharH;
+			double avgHeight = (botBorder - upBorder)*1.0 / clus[i].size();
+
+			int leftBorder = 10000, rightBorder = 0;	//¼ÆËãx·½ÏòĞÅÏ¢£¬´Ë´¦leftBorderÖ¸µÄÊÇ¾ØĞÎÖĞÏß×ø±ê
+			double topHalf = 0, bottomHalf = 0;
+			for (int j = 0; j < clus[i].size(); j++)
+			{
+				if (j + 1 < (clus[i].size()+1) / 2.0)
+					topHalf += clus[i][j].x + clus[i][j].width*0.5;
+				else if(j + 1 > (clus[i].size()+1) / 2.0)
+					bottomHalf += clus[i][j].x + clus[i][j].width*0.5;
+				if (clus[i][j].x + clus[i][j].width*0.5 < leftBorder)
+					leftBorder = clus[i][j].x + clus[i][j].width*0.5;
+				if (clus[i][j].x + clus[i][j].width*0.5 > rightBorder)
+					rightBorder = clus[i][j].x + clus[i][j].width*0.5;
+			}
+			double xOffset = (rightBorder - leftBorder) * 1.0 / (clus[i].size()-1);
+
+			for (int j = 0; j < clus[i].size(); j++)
+			{
+				clus[i][j].y = upBorder + round(avgHeight * j);
+				clus[i][j].height = round(avgHeight);
+				clus[i][j].width = mainCharW * 1.4 > clus[i][j].width ? mainCharW * 1.4 : clus[i][j].width;
+				if (topHalf > bottomHalf)
+					clus[i][j].x = leftBorder + round(xOffset*(clus[i].size() - j - 1) - 0.7*mainCharW);
+				else
+					clus[i][j].x = leftBorder + round(xOffset*j - 0.7*mainCharW);
+			}
+		}
+	}
+}
+
 void MserFilter::patchByBorder(vector<cv::Rect>& bboxes, int mainCharH, int border, int targetLen)
 {
     if(bboxes[0].y > border)  //  ÀûÓÃÉÏ±ß½çÀ´patch
 	{
-        while (bboxes[0].y - border > mainCharH)	//²»Í£µÄÌî³ä£¬Ö±µ½Á½Õß¾àÀëºÜ½ü
+        while (bboxes[0].y - border > mainCharH && bboxes.size() < targetLen)	//²»Í£µÄÌî³ä£¬Ö±µ½Á½Õß¾àÀëºÜ½ü
             bboxes.insert(bboxes.begin(), Rect(bboxes[0].x, bboxes[0].y-mainCharH, bboxes[0].width, mainCharH));
         while (bboxes.size() < targetLen)	// ÉÏ·½µ½¶¥ºó£¬ÔÙ¼ÌĞøÍùÏÂ·½¼Ó
             bboxes.push_back(Rect(bboxes.back().x, bboxes.back().y + mainCharH, bboxes.back().width, mainCharH));
     }
     else if(bboxes.back().y + bboxes.back().height < border)    //ÀûÓÃÏÂ±ß½çÀ´patch
     {
-		while (border - bboxes.back().y - bboxes.back().height > mainCharH)	//²»Í£µÄÌî³ä£¬Ö±µ½Á½Õß¾àÀëºÜ½ü
+		while (border - bboxes.back().y - bboxes.back().height > mainCharH && bboxes.size() < targetLen)	//²»Í£µÄÌî³ä£¬Ö±µ½Á½Õß¾àÀëºÜ½ü
 			bboxes.push_back(Rect(bboxes.back().x, bboxes.back().y + mainCharH, bboxes.back().width, mainCharH));
 		while (bboxes.size() < targetLen)   // ÏÂ·½µ½µ×ºó£¬ÔÙ¼ÌĞøÍùÉÏ·½¼Ó
 			bboxes.insert(bboxes.begin(), Rect(bboxes[0].x, bboxes[0].y - mainCharH, bboxes[0].width, mainCharH));
@@ -770,14 +881,65 @@ void MserFilter::simpleClus(vector<vector<cv::Rect>> &tmpClus, vector<cv::Rect> 
 	}
 }
 
-void MserFilter::rmColOutlier(vector<cv::Rect>& clus, int mainCharH, int mainCharW)
+void MserFilter::rmColOutlier(vector<cv::Rect>& clus, int mainCharH, int mainCharW, int mode)
 {
+	double areaThre = (mode == CONTAINER_MOD) ? 1.7 : 2.5;
 	for (int i = 0; i < clus.size(); i++)
-		if (clus[i].width > clus[i].height || clus[i].area() > 2.5*mainCharH*mainCharW)	//Ò»Ğ©·Ç³£Ã÷ÏÔµÄoutlier£¬Ö±½ÓÉ¾³ı
+		if (clus[i].width > clus[i].height || clus[i].area() > areaThre*mainCharH*mainCharW)	//Ò»Ğ©·Ç³£Ã÷ÏÔµÄoutlier£¬Ö±½ÓÉ¾³ı
 		{
 			clus.erase(clus.begin() + i);
 			i--;
 		}
+		
+	if (mode == CONTAINER_ID && clus.size() > 11)
+	{
+		sort(clus.begin(), clus.end(), sideSortByY);
+		while(clus.size() > 11)
+		{
+			if (clus[1].y - clus[0].y - clus[0].height > 0.5*mainCharH)
+				clus.erase(clus.begin());
+			else
+				break;
+		}
+	}
+}
+
+int MserFilter::getContainerIdIdx(vector<vector<cv::Rect>>& tmpClus, int mainCharH)
+{
+	sort(tmpClus.begin(), tmpClus.end(), clusSortByY);
+	int maxIdx = 0, maxLen = 0;
+	for (int i = 0; i<tmpClus.size(); i++)	//×î³¤ÖĞ×îÏÂÃæµÄÄÇ¸ö
+		if (tmpClus[i].size() >= maxLen)
+		{
+			maxLen = tmpClus[i].size();
+			maxIdx = i;
+		}
+
+	if (maxLen > 4)
+		return maxIdx;
+
+	// ¸ù¾İdeeplabBboxµÄÎ»ÖÃ¾ö¶¨containerIdIdxµÄÖµ
+	if (deeplabBbox.y + deeplabBbox.height > 0.99*srcImg.rows && deeplabBbox.y > srcImg.rows*0.5)	//¼¯×°ÏäÖ»ÓĞÉÏ°ë²¿·ÖÔÚÍ¼Æ¬ÖĞ£¬ÕâÖÖÇé¿öÍ¨³£»áÓĞÏäºÅÂ©µô£¬´ËÊ±Ö±½ÓÈ¡×îÏÂÃæÒ»¸öÀà
+		return tmpClus.size() - 1;
+	else	//¼¯×°ÏäÈ«²¿ÔÚÍ¼Æ¬ÖĞ£¬
+	{
+		if(tmpClus.back().size() > 1)	//ÈôÊÇ×îºóÒ»¸öµÄ³ß´ç>1£¬ÔòÖ±½ÓÒÔ×îºóÒ»¸ö×÷ÎªÄ¿±êÏî
+			return tmpClus.size() - 1;
+
+		maxIdx = tmpClus.size() - 1, maxLen = 0;
+		for (int i = tmpClus.size() - 1; i >= 0; i--)	//containerIdÓ¦¸ÃÓĞRectÀë×îÏÂÃæÒ»¸öÀà²»Ì«Ô¶(<6*mainCharH)
+		{
+			sort(tmpClus[i].begin(), tmpClus[i].end(), sideSortByY);
+			if (tmpClus.back()[0].y - tmpClus[i].back().y - tmpClus[i].back().height > 6 * mainCharH)
+				break;
+			if (tmpClus[i].size() >= maxLen)
+			{
+				maxLen = tmpClus[i].size();
+				maxIdx = i;
+			}
+		}
+		return maxIdx;
+	}
 }
 
 MserFilter::~MserFilter()

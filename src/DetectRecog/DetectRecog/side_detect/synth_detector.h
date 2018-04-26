@@ -4,10 +4,6 @@
 #include "mser_filter.h"
 #include "east_filter.h"
 
-#define COMPANY_ID 0		//¹«Ë¾ºÅ
-#define CONTAINER_ID 1		//ÏäºÅ
-#define CONTAINER_MOD_NUM 2 //ÏäÐÍ
-
 class SynthDetector
 {
 public:
