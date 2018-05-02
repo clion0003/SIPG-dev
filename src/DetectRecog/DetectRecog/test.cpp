@@ -1,6 +1,7 @@
 #include "detect\detect.h"
 #include "side_detect\side_detect.h"
 #include "socketcpp\tcpClient.h"
+#include "analysis\analysis.h"
 
 #include <iostream>
 #include <vector>
@@ -45,8 +46,11 @@ void help() {
     for (auto it : fileNames) {
         
         if (it.length() == 4 && it[0] == '0') {
+            vector<string> cadlist;
             cout << it << endl;
             out << it << endl;
+            int num = stoi(it);
+            //if (num != 126 && num != 113) continue;
             string p = path + it + "\\";
             vector<string> fnames = getDirFileNames(p);
             for (auto f : fnames) {
@@ -60,18 +64,19 @@ void help() {
                 clock_t end = clock();
                 cout << "Time: " << end - start << "ms" << endl;
                 out << "Time: " << end - start << "ms" << endl;
+                cadlist.push_back(string(buf));
             }
+            cout << "final result:" << endl;
+            string res = getResult(cadlist);
+            cout << res << endl;
+            out << res << endl;
         }
     }
     out.close();
 }
 
 int main() {
-    int round = 0;
-    while (true) {
-        cout << round++ << endl;
-        help();
-    }
+    help();
     system("pause");
     return 0;
 }

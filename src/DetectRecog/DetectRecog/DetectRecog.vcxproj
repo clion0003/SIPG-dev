@@ -131,6 +131,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="analysis\analysis.cpp" />
     <ClCompile Include="detect\getMSER.cpp" />
     <ClCompile Include="detect\NumberDetector.cpp" />
     <ClCompile Include="detect\recallratio.cpp" />
@@ -148,6 +149,7 @@
     <ClCompile Include="test.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="analysis\analysis.h" />
     <ClInclude Include="detect\colors.h" />
     <ClInclude Include="detect\config.h" />
     <ClInclude Include="detect\detect.h" />
