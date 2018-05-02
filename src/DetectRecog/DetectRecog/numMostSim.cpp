@@ -9,7 +9,7 @@
 #include <cstring>
 using namespace std;
 
-string CONNUMDATA = "D:/ACCRS-master/conNumData.txt";
+string CONNUMDATA = "../../conNumData.txt";
 
 static bool readMatchData(list<string> * p_matchData);
 extern void lcss(const string str1, const string str2, string& str);

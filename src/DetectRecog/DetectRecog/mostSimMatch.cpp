@@ -12,8 +12,8 @@
 using namespace std;
 
 /*存放匹配字符串的文本文件名*/
-string MATCHDATA = "D:/ACCRS-master/matchData.txt";
-string SPECIALCASEDATA = "D:/ACCRS-master/specialCase.ini";
+string MATCHDATA = "../../matchData.txt";
+string SPECIALCASEDATA = "../../specialCase.ini";
 
 extern void lcss(const string str1, const string str2, string& str);
 bool mostSimMatch(const string &iStr, string &oStr);

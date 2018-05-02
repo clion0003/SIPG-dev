@@ -286,3 +286,5 @@ src/DetectRecog/.vs/DetectRecog/v14/.suo
 src/DetectRecog/DetectRecog/side_detect/main.cpp
 
 myserver.py
+src/DetectRecog/DetectRecog/test.cpp
+src/DetectRecog/DetectRecog/*.txt
