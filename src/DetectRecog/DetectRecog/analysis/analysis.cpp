@@ -145,9 +145,16 @@ static set<string> companyDict;
 
 static void loadCompanyData() {
     fstream in(CompanyDataPath);
-    string tmp;
-    while (in >> tmp) {
-        companyDict.insert(tmp);
+    if (!in) in = fstream("D:\\repos\\SIPG-dev\\src\\company_id.txt");
+    if (in) {
+        string tmp;
+        while (in >> tmp) {
+            companyDict.insert(tmp);
+        }
+        cout << "load company dict success: " << companyDict.size() << endl;
+    }
+    else {
+        cout << "error: can't load company dict." << endl;
     }
 }
 
@@ -155,6 +162,7 @@ string getCompany(vector<string>& a) {
     if (!companyDict.size()) loadCompanyData();
     map<string, int> dp;
     for (auto it : a) {
+        cout << it << endl;
         if (it.length()<3 || it.length()>5) continue;
         if (it == "????") continue;
         for (auto& ch : it) {
@@ -184,6 +192,7 @@ string getCompany(vector<string>& a) {
             dp[it]++;
         }
     }
+    cout << "debug"<<dp.size() << endl;
     return getMostNum(dp, "????");
 }
 
@@ -243,6 +252,54 @@ string getMostNum(map<string, int>& a, string init) {
     return res;
 }
 
+map<char, char> alpha2num = {
+    { 'A', '8' }, { 'B', '8' }, { 'C', '6' }, { 'D', '0' }, { 'E', '6' },
+    { 'F', '2' }, { 'G', '6' }, { 'H', '8' }, { 'I', '1' }, { 'J', '1' },
+    { 'K', '7' }, { 'L', '1' }, { 'M', '8' }, { 'N', '7' }, { 'O', '0' },
+    { 'P', '7' }, { 'Q', '0' }, { 'R', '9' }, { 'S', '5' }, { 'T', '1' },
+    { 'U', '7' }, { 'V', '0' }, { 'W', '9' }, { 'X', '5' }, { 'Y', '1' },
+    { 'Z', '2' }, { 'a', '0' }, { 'b', '6' }, { 'c', '0' }, { 'd', '0' },
+    { 'e', '6' }, { 'f', '1' }, { 'g', '9' }, { 'h', '6' }, { 'i', '1' },
+    { 'j', '1' }, { 'k', '7' }, { 'l', '1' }, { 'm', '8' }, { 'n', '6' },
+    { 'o', '0' }, { 'p', '0' }, { 'q', '9' }, { 'r', '1' }, { 's', '5' },
+    { 't', '1' }, { 'u', '0' }, { 'v', '0' }, { 'w', '9' }, { 'x', '0' },
+    { 'y', '9' }, { 'z', '2' }
+};
+
+
+void convert2num(string& a) {
+    for (auto& ch : a) {
+        if (alpha2num.find(ch) != alpha2num.end()) ch = alpha2num[ch];
+    }
+}
+void convert2alpha(string& a) {
+    for (auto& ch : a) {
+        if (ch == '2') {
+            ch = 'Z';
+        }
+        else if (ch == '1') {
+            ch = 'I';
+        }
+        else if (ch == '3') {
+            ch = 'B';
+        }
+        else if (ch == '7') {
+            ch = 'K';
+        }
+        else if (ch == '6') {
+            ch = 'G';
+        }
+        else if (ch == '0') {
+            ch = 'O';
+        }
+        else if (ch == '8') {
+            ch = 'B';
+        }
+        else if (ch == '5') {
+            ch = 'S';
+        }
+    }
+}
 string getResult(vector<string>& a) {
     map<string, int> dp;
     vector<string> typelist;
@@ -251,9 +308,12 @@ string getResult(vector<string>& a) {
     for (auto it : a) {
         auto tmp = split(it, " ");
         tmp.resize(3, "");
+        convert2alpha(tmp[0]);
+        convert2num(tmp[1]);
         string tmpnum = tmp[0] + tmp[1];
         if (isVaild(tmpnum) == VAILD_BOX_ID) {
             tmpnum = tmp[0] + " " + tmp[1];
+            cout << "gentmpnum:" << tmpnum << endl;
             dp[tmpnum]++;
         }
         companylist.push_back(tmp[0]);
@@ -262,8 +322,10 @@ string getResult(vector<string>& a) {
     }
     string type = getType(typelist);
     string company = getCompany(companylist);
+    cout << company << endl;
     if (dp.size()) {
         string res = getMostNum(dp);
+        cout << "gen:" << res << endl;
         vector<string> cad;
         for (auto it : dp) {
             if (it.second == dp[res]) {
@@ -281,6 +343,7 @@ string getResult(vector<string>& a) {
                     tmp.push_back(it.substr(5, 12));
                 }
             }
+            cout << tmp.size() << endl;
             res = company + " ";
             res += findSimilar(numlist, tmp);
             res += " " + type;

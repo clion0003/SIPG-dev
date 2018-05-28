@@ -58,7 +58,7 @@ int SynthDetector::synthRes(vector<vector<cv::Rect>> &mserRes, vector<vector<cv:
 	/******** ½øÐÐ×ÛºÏ ********/
 
 	/*************************/
-
+    cv::Mat showImg = srcImg;
 	int cnt = 0;
 	for (int i = 0; i < mserRes.size(); i++)
 		for (int j = 0; j < mserRes[i].size(); j++)
@@ -68,8 +68,12 @@ int SynthDetector::synthRes(vector<vector<cv::Rect>> &mserRes, vector<vector<cv:
 			{
 				cv::Mat tmpImg(srcImg, mserRes[i][j]);
 				cv::imwrite(tmpSavePath + to_string(cnt) + ".jpg", tmpImg);
+                cv::rectangle(showImg, mserRes[i][j], cv::Scalar(0, 0, 255));
 				cnt++;
 			}
 		}
+    string showPath = imgPath;
+    for (auto& ch : showPath) if (!isalpha(ch)&&!isdigit(ch)) ch = '_';
+    cv::imwrite("C:\\Users\\archlab\\Desktop\\showImg\\"+showPath +".jpg", showImg);
 	return 0;
 }

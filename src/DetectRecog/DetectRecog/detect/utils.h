@@ -6,6 +6,9 @@
 #include <string>
 #include <math.h>
 #include "MyTypes.h"
+
+#define SHOWIMAGE
+
 //#include <dirent.h>
 using std::string;
 //#include <cmath>
@@ -41,3 +44,12 @@ void addUnknownMark(string& str,int targetLength,int removePos);
 //bool sortByLen(vector<cv::Rect> v1, vector<cv::Rect> v2);
 //void clearDir(string path);
 bool clusterSortByY(vector<cv::Rect>& c1, vector<cv::Rect>& c2);
+
+
+// added by devil.
+// used for save tmp image.
+const string tmpImagePath = "C:\\Users\\archlab\\Desktop\\showImg\\";
+void saveTmpImage(cv::Mat img, string filename, string path);
+void saveTmpImage(cv::Mat img, string filename);
+void saveTmpImage(cv::Mat img, string filename, vector<Rect> boxlist);
+void saveTmpImage(cv::Mat img, string filename, vector<east_bndbox> boxlist);

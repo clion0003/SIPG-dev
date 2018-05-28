@@ -137,6 +137,9 @@
     <ClCompile Include="detect\recallratio.cpp" />
     <ClCompile Include="detect\synth.cpp" />
     <ClCompile Include="detect\utils.cpp" />
+    <ClCompile Include="gate_detect\gateDetect.cpp" />
+    <ClCompile Include="gate_detect\gateUtils.cpp" />
+    <ClCompile Include="gate_detect\playground.cpp" />
     <ClCompile Include="lcss.cpp" />
     <ClCompile Include="mostSimMatch.cpp" />
     <ClCompile Include="numMostSim.cpp" />
@@ -157,6 +160,8 @@
     <ClInclude Include="detect\NumberDetector.h" />
     <ClInclude Include="detect\recallratio.h" />
     <ClInclude Include="detect\utils.h" />
+    <ClInclude Include="gate_detect\gateDetect.h" />
+    <ClInclude Include="gate_detect\gateUtils.h" />
     <ClInclude Include="side_detect\east_filter.h" />
     <ClInclude Include="side_detect\mser_filter.h" />
     <ClInclude Include="side_detect\side_detect.h" />

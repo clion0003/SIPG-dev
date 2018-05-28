@@ -15,7 +15,6 @@ NumberDetector::NumberDetector(string& imgpath, vector<Rect>& ctpn_boxes, vector
 	_deeplab_box = deeplab_box;
 }
 
-
 void NumberDetector::filterByDeeplab(vector<Rect>& input_boxes, vector<Rect>& output_boxes) {
 	float middleline = _deeplab_box.x + _deeplab_box.width*0.5;
 	for (auto rect : input_boxes)
@@ -65,7 +64,7 @@ int NumberDetector::judgeSide() {
 	boxClusteringVertical(geometry_filter, clusters, 10, 10, 80);
 
 	Mat drawimg;
-#if 0
+#ifdef IMAGESHOW
 	_org_img.copyTo(drawimg);
 	for (auto rects : clusters) {
 		cv::Scalar color(1.0*rand() / RAND_MAX * 255, 1.0*rand() / RAND_MAX * 255, 1.0*rand() / RAND_MAX * 255);
@@ -187,6 +186,10 @@ string NumberDetector::detectVerticalNumber(string savepath) {
 	vector<Rect> geometry_filter;
 	geometryFilter(_mser_boxes, geometry_filter,0);
 
+    saveTmpImage(_org_img, "geometry", geometry_filter);
+    saveTmpImage(_org_img, "_test");
+
+
 	//vector<Rect> ctpn_filter;
 	//filterByCTPNVertical(geometry_filter, ctpn_filter, 20, 20);
 
@@ -198,13 +201,14 @@ string NumberDetector::detectVerticalNumber(string savepath) {
 	vector<vector<Rect>> clusters;
 	boxClusteringVertical(geometry_filter, clusters, 10,10,80);
 
-#if 0
+#ifdef SHOWIMAGE2
 	_org_img.copyTo(drawimg);
 	for (auto rect : geometry_filter) {
 		cv::rectangle(drawimg, rect, (0, 0, 255), 1);
 	}
 	cv::imshow("mser", drawimg);
 	cv::waitKey(0);
+    cv::destroyWindow("mser");
 #endif
 
 	//the cluster with longest length in vertical direction
@@ -219,7 +223,7 @@ string NumberDetector::detectVerticalNumber(string savepath) {
 			maxLenClusterID = i;
 		}
 	}
-#if 0
+#ifdef SHOWIMAGE2
 	_org_img.copyTo(drawimg);
 	for (auto rects : clusters) {
 		cv::Scalar color(1.0*rand()/RAND_MAX*255, 1.0*rand()/ RAND_MAX*255, 1.0*rand()/ RAND_MAX*255);
@@ -228,17 +232,18 @@ string NumberDetector::detectVerticalNumber(string savepath) {
 	}
 	cv::imshow("clusters", drawimg);
 	cv::waitKey(0);
+    cv::destroyWindow("clusters");
 #endif
 	vector<Rect> numberVertical = clusters[maxLenClusterID];
 
-#ifdef SHOW_CLUSTERING
+#ifdef SHOWIMAGE2
 	_org_img.copyTo(drawimg);
 	for (auto rect : numberVertical) {
 		cv::rectangle(drawimg, rect, (0, 0, 255), 1);
 	}
 	cv::imshow("cluster", drawimg);
 	cv::waitKey(0);
-	
+    cv::destroyWindow("cluster");
 	
 #endif
 	
@@ -261,13 +266,14 @@ string NumberDetector::detectVerticalNumber(string savepath) {
 	vector<Rect> mergedRect;
 	mergeSameHorizon(splitRect, mergedRect);
 
-#ifdef SHOW_FINAL
+#ifdef SHOWIMAGE
 	_org_img.copyTo(drawimg);
 	for (auto rect : mergedRect) {
 		cv::rectangle(drawimg, rect, (0,0,255), 1);
 	}
 	cv::imshow("vertical numbers", drawimg);
 	cv::waitKey(0);
+    //cv::destroyWindow("vertical numbers");
 #endif
 	//string savepath = "D:/frontSaveImg/";
 
@@ -285,11 +291,14 @@ string NumberDetector::detectVerticalNumber(string savepath) {
 	}
 	string recog_result;
 	alex_request(savepath, recog_result);
-	
+    cout << "tmp_result:"<<recog_result << endl;
+    std::transform(recog_result.begin(), recog_result.end(), recog_result.begin(), ::toupper);
+    if(recog_result.length()>4) recog_result.insert(4, " ");
+    return recog_result;
 	//return recog_result;
 
 
-#if 0
+#ifdef SHOWIMAGE
 	_org_img.copyTo(drawimg);
 	for (int i = 0;i < fillGapRects.size();i++) {
 		
@@ -303,6 +312,7 @@ string NumberDetector::detectVerticalNumber(string savepath) {
 	}
 	cv::imshow(_imgpath, drawimg);
 	cv::waitKey(0);
+    cv::destroyWindow(_imgpath);
 #endif
 	//recog_result.insert(4, " ");
 	std::transform(recog_result.begin(), recog_result.end(), recog_result.begin(), ::tolower);
@@ -620,7 +630,7 @@ string NumberDetector::detectRowNumber_front(string imgsavepath) {
 	vector<vector<Rect>> clusters;
 	clusteringRects(slim_rects, clusters, 100, 20, 15);
 
-#if 0
+#ifdef IMAGESHOW
 	for (auto rect : filter_boxes) {
 		rectangle(showimg3, rect, red, 1);
 	}
@@ -765,7 +775,6 @@ string NumberDetector::detectRowNumber_front(string imgsavepath) {
 	}
 
 
-
 	int count = 0;
 	for (auto rect : upboxes) {
 		Mat img = _org_img(rect);
@@ -776,8 +785,6 @@ string NumberDetector::detectRowNumber_front(string imgsavepath) {
 
 	//mergeVerifyNum(midboxes);
 	for (auto rect : midboxes) {
-
-
 		scaleSingleRect(rect, 0.1, 0.1, _org_img.cols, _org_img.rows);
 		Mat img = _org_img(rect);
 		if (rect.width < rect.height) {
@@ -800,17 +807,14 @@ string NumberDetector::detectRowNumber_front(string imgsavepath) {
 
 	vector<string> strs;
 	crnn_request(imgsavepath, strs);
-    /*
-	string output_str;
-    
-	if (strs.size() > 0)
-		output_str = strs[0];
+    cout << "tmp_result:" << endl;
+    for (int i = 0; i < strs.size();i++) {
+        cout << i << ": " << strs[i] << endl;
+    }
+    cout << endl;
 
-	for (int i = 1; i < strs.size(); i++)
-		output_str = output_str + " " + strs[i];
-	std::transform(output_str.begin(), output_str.end(), output_str.begin(), ::toupper);
-	return output_str;
-    */
+
+
 	count = 0;
 
 	string output_str = "";
@@ -819,8 +823,8 @@ string NumberDetector::detectRowNumber_front(string imgsavepath) {
 		rectangle(showimg4, rect, green, 2);
 
 
-		string chechdatabase;
-		conNuMostSimMatch(strs[count], chechdatabase);
+		string chechdatabase = strs[count];
+		//conNuMostSimMatch(strs[count], chechdatabase);
 		output_str = output_str + chechdatabase;
 
 		cv::putText(showimg4, chechdatabase, cv::Point(rect.x, rect.y), 1.9, 1.7, red, 2);
@@ -894,12 +898,18 @@ string NumberDetector::detectRowNumber_front(string imgsavepath) {
 	addUnknownMark(output_str, 15, 8);
 	output_str.insert(11, " ");
 	output_str.insert(4, " ");
+    if (strs.size()&&strs[0].length()>=4) {
+        for (int i = 0; i < 4; i++) {
+            output_str[i] = strs[0][i];
+        }
+    }
+
 	//cout << output_str << endl;
-#if 0
+#ifdef IMAGESHOW
 	cv::imshow(_imgpath, showimg4);
 	cv::waitKey(0);
 #endif 
-#if 0
+#ifdef IMAGESHOW
 	for (int i = 0; i < clusterNum; i++) {
 		cv::Scalar rectColor(rand()*1.0 / RAND_MAX * 255, rand()*1.0 / RAND_MAX * 255, rand()*1.0 / RAND_MAX * 255);
 		for (auto rect : clusters[i]) {

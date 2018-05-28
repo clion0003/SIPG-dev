@@ -563,3 +563,41 @@ bool clusterSortByY(vector<cv::Rect>& c1, vector<cv::Rect>& c2)
 //	struct dirent **files;
 //	int n = scandir(dirname, &files, NULL, alphasort);
 //}
+
+void saveTmpImage(cv::Mat img, string filename, string path) {
+    path += filename + ".jpg";
+    cv::imwrite(path, img);
+}
+
+void saveTmpImage(cv::Mat img, string filename) {
+#ifdef SHOWIMAGE
+    string path = tmpImagePath + filename + ".jpg";
+    cv::imwrite(path, img);
+#endif // SHOWIMAGE
+}
+
+void saveTmpImage(cv::Mat img, string filename, vector<Rect> boxlist) {
+#ifdef SHOWIMAGE
+    string path = tmpImagePath + filename + ".jpg";
+    cv::Mat tmp = img.clone();
+    for (auto box : boxlist) {
+        cv::rectangle(tmp, box, cv::Scalar(0, 0, 255));
+    }
+    cv::imwrite(path, tmp);
+#endif // SHOWIMAGE
+}
+void saveTmpImage(cv::Mat img, string filename, vector<east_bndbox> boxlist) {
+#ifdef SHOWIMAGE
+
+    string path = tmpImagePath + filename + ".jpg";
+    cv::Mat tmp = img.clone();
+    for (auto box : boxlist) {
+        cv::line(tmp, cv::Point(box.x0, box.y0), cv::Point(box.x1, box.y1), cv::Scalar(0, 255, 255));
+        cv::line(tmp, cv::Point(box.x1, box.y1), cv::Point(box.x2, box.y2), cv::Scalar(0, 255, 255));
+        cv::line(tmp, cv::Point(box.x2, box.y2), cv::Point(box.x3, box.y3), cv::Scalar(0, 255, 255));
+        cv::line(tmp, cv::Point(box.x3, box.y3), cv::Point(box.x0, box.y0), cv::Scalar(0, 255, 255));
+    }
+    cv::imwrite(path, tmp);
+#endif // SHOWIMAGE
+
+}
